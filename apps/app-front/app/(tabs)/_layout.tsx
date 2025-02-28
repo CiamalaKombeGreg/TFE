@@ -1,29 +1,31 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Tabs } from "expo-router";
-import TabBar from "@/app/components/TabBar";
+import { Drawer } from "expo-router/drawer";
 
-const TabsLayout = () => {
+const tabs = {
+  Accueil: "index",
+  Profil: "users/[id]",
+};
+
+const DrawerLayout = () => {
   return (
-    <Tabs
-      tabBar={(props) => <TabBar {...props} />}
-      screenOptions={{ tabBarActiveTintColor: "red" }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          headerTitle: "Accueil",
-          title: "Accueil",
-        }}
-      />
-      <Tabs.Screen
-        name="users/[id]"
-        options={{
-          headerTitle: "Profil",
-          title: "Profil",
-        }}
-      />
-    </Tabs>
+    <>
+      <Drawer>
+        <Drawer.Screen
+          name={tabs.Accueil}
+          options={{
+            drawerLabel: "Acceuil",
+            title: "Accueil",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.Profil}
+          options={{
+            drawerLabel: "Profil",
+            title: "Profil",
+          }}
+        />
+      </Drawer>
+    </>
   );
 };
 
-export default TabsLayout;
+export default DrawerLayout;
