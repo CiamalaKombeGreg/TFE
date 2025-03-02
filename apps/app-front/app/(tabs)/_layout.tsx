@@ -3,9 +3,11 @@ import { Drawer } from "expo-router/drawer";
 const tabs = {
   Accueil: "index",
   Profil: "users/[id]",
+  Form: "form/dischargeRequest",
 };
 
 const DrawerLayout = () => {
+  const links = Object.values(tabs);
   return (
     <>
       <Drawer>
@@ -21,6 +23,13 @@ const DrawerLayout = () => {
           options={{
             drawerLabel: "Profil",
             title: "Profil",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.Form}
+          options={{
+            drawerLabel: "Demander",
+            title: "Demander",
           }}
         />
       </Drawer>
