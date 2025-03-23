@@ -13,14 +13,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/*----------------------------------------------------- Type personnaliser -----------------------------------------------------*/
+/**
+ * ----------------------------------------------------- Type personnaliser -----------------------------------------------------
+ */
 
-/*
-* Role définit les rôles actuelle dans l'entreprise
-* - SUPERADMIN est le seul qui peut se donner des congé (tout les droits)
-* - RH peut donner des congé à ses supervisés
-* - Un RH doit demander au superadmin pour obtenir des congé
-*/
+/**
+ * Role définit les rôles actuelle dans l'entreprise
+ * - SUPERADMIN est le seul qui peut se donner des congé (tout les droits)
+ * - RH peut donner des congé à ses supervisés
+ * - Un RH doit demander au superadmin pour obtenir des congé
+ */
 
 enum Role {
   SUPERADMIN // Droits maximum, la plus haute instance dans l'entreprise
@@ -32,30 +34,11 @@ enum Role {
 
 //-------------------------------------------------------------------------------//
 
-/*
-* La liste des type d'absences possible
-* - Les télétravails compte comme journée de travail, donc les chèques repas son attribué
-* - Les congés MALADIE & EXCEPTIONNEL sont illimités à condition d'introduire une pièce jointe et/ou preuve
-* - Les congés LEGAUX, EXTRA_LEGAUX, FERIE, SANSSOLDE & TELETRAVAIL doivent être obligatoirement accepté par un superviseur
-*/
-
-enum AbsType {
-  LEGAUX // Congé légaux sont donnée par année, des jours de congés accorder aux personnel | Congé est payé
-  EXTRA_LEGAUX // Congé accordé en suplément des congés légaux | Congé est payé
-  TELETRAVAIL // Journée de télétrail qui sont accordées par semaine
-  FERIE // Jours férié ayant été reporté, accordé chaque année
-  SANSSOLDE // Congé pouvant être demander sans motif particulier
-  MALADIE
-  EXCEPTIONNEL
-}
-
-//-------------------------------------------------------------------------------//
-
-/*
-* Voici les status possible pour un congé lorsqu'il est encodé
-* - Un seul status possible par absences
-* - Une demande est nécessaire pour annuler une absence accepter, néanmoins le superviseur peux annuler l'absence si ce dernier prévient le personnel touché
-*/
+/**
+ * Voici les status possible pour un congé lorsqu'il est encodé
+ * - Un seul status possible par absences
+ * - Une demande est nécessaire pour annuler une absence accepter, néanmoins le superviseur peux annuler l'absence si ce dernier prévient le personnel touché
+ */
 
 enum Status {
   ACCEPTER
@@ -64,79 +47,109 @@ enum Status {
   ANNULER
 }
 
+/**
+ * ----------------------------------------------------- Tables générals -----------------------------------------------------
+ */
 
-/*----------------------------------------------------- Tables générals -----------------------------------------------------*/
+/**
+ * Cette table indique chaque membre du personnel
+ * - Un employé peux avoir plusieurs rôles
+ * - Le total de congé donner peux être dépasser, mais un message d'avertissement devra être mis en place
+ * - Un superviseur peux supervisé plusieurs personne
+ * - Un membre peux être supervisé par plusieurs superviseurs
+ */
 
-/*
-* Cette table indique chaque membre du personnel
-* - Un employé peux avoir plusieurs rôles
-* - Le total de congé donner peux être dépasser, mais un message d'avertissement devra être mis en place
-* - Un superviseur peux supervisé plusieurs personne
-* - Un membre peux être supervisé par plusieurs superviseurs
-*/
-
-model Personnel{
-  prsId String @id @default(uuid())
-  prenom String
-  nom String
-  email String @unique
-  role Role[] // Rôle dans l'entreprise
-  notifications String[] // Notifications garder en database sur l'application
-  total_cl Int? // Nombre de congés légaux sur l'année
-  total_cel Int? // Nombre de congés extra-légaux sur l'année
+model Personnel {
+  prsId             String        @id @default(uuid())
+  prenom            String
+  nom               String
+  email             String        @unique
+  role              Role[] // Rôle dans l'entreprise
+  notifications     String[] // Notifications garder en database sur l'application
+  total_cl          Int? // Nombre de congés légaux sur l'année
+  total_cel         Int? // Nombre de congés extra-légaux sur l'année
   total_teletravail Int? // Nombre de jour de télétravail sur la semaine
-  total_jfr Int? // Nombre de jours férié reporté (Fonctionne comme les congé)
-  supervisor Supervision[] @relation("superviseur") // Liste des gens qui supervise la personne
-  supervise Supervision[] @relation("supervise") // Liste des gens que la personne supervise
-  conges Conge[] @relation("personnel")
+  total_jfr         Int? // Nombre de jours férié reporté (Fonctionne comme les congé)
+  supervisor        Supervision[] @relation("superviseur") // Liste des gens qui supervise la personne
+  supervise         Supervision[] @relation("supervise") // Liste des gens que la personne supervise
+  conges            Conge[]       @relation("personnel")
 
   @@unique([prenom, nom])
 }
 
 //-------------------------------------------------------------------------------//
 
-/*
-* Cette table permet de structuré les absences possible
-* - Par défaut, une absence demander est en ANALYSE
-* - A voir, mais une pièce jointe peuvent être rajouter si le congé est EXCEPTIONNEL ou MALADIE (déclaration de congé)
-*/
+/**
+ * Cette table permet de structuré les absences possible
+ * - Par défaut, une absence demander est en ANALYSE
+ * - A voir, mais une pièce jointe peuvent être rajouter si le congé est EXCEPTIONNEL ou MALADIE (déclaration de congé)
+ */
 
-model Absences{
-  absId String @id @default(uuid())
-  type AbsType
-  createAt DateTime @default(now())
-  updateAt DateTime @updatedAt
-  status Status @default(ANALYSE)
+model Absences {
+  absId       String   @id @default(uuid())
+  title       String
+  typeId      String
+  absType     AbsType  @relation("type", fields: [typeId], references: [typeId])
+  startDate   DateTime
+  endDate     DateTime
+  createAt    DateTime @default(now())
+  updateAt    DateTime @updatedAt
+  status      Status   @default(ANALYSE)
   commentaire String
-  conges Conge[] @relation("absence")
-}
-
-/*----------------------------------------------------- Tables intermédiaire -----------------------------------------------------*/
-
-/*
-* Table intermédiaire entre un personnel et un autre, relation unaire donc TABLE INTERMEDIAIRE
-*/
-
-model Supervision{
-  superviseur Personnel @relation("superviseur",fields: [superviseurId], references: [prsId])
-  superviseurId String
-  supervise Personnel @relation("supervise",fields: [superviseId], references: [prsId])
-  superviseId String
-
-  @@id([superviseId,superviseurId])
+  conges      Conge[]  @relation("absence")
 }
 
 //-------------------------------------------------------------------------------//
 
-/*
-* Table intermédiaire entre un personnel et un conge, relation many to many donc TABLE INTERMEDIAIRE
-*/
+/**
+ * La liste des type d'absences possible
+ * - Les télétravails compte comme journée de travail, donc les chèques repas son attribué
+ * - Les congés MALADIE & EXCEPTIONNEL sont illimités à condition d'introduire une pièce jointe et/ou preuve
+ * - Les congés LEGAUX, EXTRA_LEGAUX, FERIE, SANSSOLDE & TELETRAVAIL doivent être obligatoirement accepté par un superviseur
+ */
+
+// LEGAUX - Congé légaux sont donnée par année, des jours de congés accorder aux personnel | Congé est payé
+// EXTRA_LEGAUX - Congé accordé en suplément des congés légaux | Congé est payé
+// TELETRAVAIL - Journée de télétrail qui sont accordées par semaine
+// FERIE - Jours férié ayant été reporté, accordé chaque année
+// SANSSOLDE - Congé pouvant être demander sans motif particulier
+// MALADIE
+// EXCEPTIONNEL
+
+model AbsType {
+  typeId   String     @id @default(uuid())
+  label    String     @unique
+  absences Absences[] @relation("type")
+}
+
+/**
+ * ----------------------------------------------------- Tables intermédiaire -----------------------------------------------------
+ */
+
+/**
+ * Table intermédiaire entre un personnel et un autre, relation unaire donc TABLE INTERMEDIAIRE
+ */
+
+model Supervision {
+  superviseur   Personnel @relation("superviseur", fields: [superviseurId], references: [prsId])
+  superviseurId String
+  supervise     Personnel @relation("supervise", fields: [superviseId], references: [prsId])
+  superviseId   String
+
+  @@id([superviseId, superviseurId])
+}
+
+//-------------------------------------------------------------------------------//
+
+/**
+ * Table intermédiaire entre un personnel et un conge, relation many to many donc TABLE INTERMEDIAIRE
+ */
 
 model Conge {
-  personnel Personnel @relation("personnel",fields: [personnelId], references:[prsId])
+  personnel   Personnel @relation("personnel", fields: [personnelId], references: [prsId])
   personnelId String
-  absence Absences @relation("absence",fields:[absenceId], references:[absId])
-  absenceId String
+  absence     Absences  @relation("absence", fields: [absenceId], references: [absId])
+  absenceId   String
 
   @@id([personnelId, absenceId])
 }
