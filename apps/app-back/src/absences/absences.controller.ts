@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Post, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Get, Post, UsePipes, ValidationPipe } from "@nestjs/common";
 import { AbsencesService } from "./absences.service";
 import { CreateAbsenceDto } from "./dtos/CreateAbsence.dto";
 
@@ -9,7 +9,12 @@ export class AbsencesController {
 
     @Post()
     @UsePipes(ValidationPipe)
-    createUser(@Body() createAbsenceDto: CreateAbsenceDto) {
-        return this.absencesService.createAbsence(createAbsenceDto)
+    createAbsence(@Body() createAbsenceData: CreateAbsenceDto) {
+        return this.absencesService.createAbsence(createAbsenceData)
+    }
+
+    @Get()
+    getAbsences(){
+        return this.absencesService.getAbsences();
     }
 }

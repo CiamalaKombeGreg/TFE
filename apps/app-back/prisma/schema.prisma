@@ -35,25 +35,6 @@ enum Role {
 //-------------------------------------------------------------------------------//
 
 /**
- * La liste des type d'absences possible
- * - Les télétravails compte comme journée de travail, donc les chèques repas son attribué
- * - Les congés MALADIE & EXCEPTIONNEL sont illimités à condition d'introduire une pièce jointe et/ou preuve
- * - Les congés LEGAUX, EXTRA_LEGAUX, FERIE, SANSSOLDE & TELETRAVAIL doivent être obligatoirement accepté par un superviseur
- */
-
-enum AbsType {
-  LEGAUX // Congé légaux sont donnée par année, des jours de congés accorder aux personnel | Congé est payé
-  EXTRA_LEGAUX // Congé accordé en suplément des congés légaux | Congé est payé
-  TELETRAVAIL // Journée de télétrail qui sont accordées par semaine
-  FERIE // Jours férié ayant été reporté, accordé chaque année
-  SANSSOLDE // Congé pouvant être demander sans motif particulier
-  MALADIE
-  EXCEPTIONNEL
-}
-
-//-------------------------------------------------------------------------------//
-
-/**
  * Voici les status possible pour un congé lorsqu'il est encodé
  * - Un seul status possible par absences
  * - Une demande est nécessaire pour annuler une absence accepter, néanmoins le superviseur peux annuler l'absence si ce dernier prévient le personnel touché
@@ -107,7 +88,8 @@ model Personnel {
 model Absences {
   absId       String   @id @default(uuid())
   title       String
-  type        AbsType
+  typeId      String
+  absType     AbsType  @relation("type", fields: [typeId], references: [typeId])
   startDate   DateTime
   endDate     DateTime
   createAt    DateTime @default(now())
@@ -115,6 +97,29 @@ model Absences {
   status      Status   @default(ANALYSE)
   commentaire String
   conges      Conge[]  @relation("absence")
+}
+
+//-------------------------------------------------------------------------------//
+
+/**
+ * La liste des type d'absences possible
+ * - Les télétravails compte comme journée de travail, donc les chèques repas son attribué
+ * - Les congés MALADIE & EXCEPTIONNEL sont illimités à condition d'introduire une pièce jointe et/ou preuve
+ * - Les congés LEGAUX, EXTRA_LEGAUX, FERIE, SANSSOLDE & TELETRAVAIL doivent être obligatoirement accepté par un superviseur
+ */
+
+// LEGAUX - Congé légaux sont donnée par année, des jours de congés accorder aux personnel | Congé est payé
+// EXTRA_LEGAUX - Congé accordé en suplément des congés légaux | Congé est payé
+// TELETRAVAIL - Journée de télétrail qui sont accordées par semaine
+// FERIE - Jours férié ayant été reporté, accordé chaque année
+// SANSSOLDE - Congé pouvant être demander sans motif particulier
+// MALADIE
+// EXCEPTIONNEL
+
+model AbsType {
+  typeId   String     @id @default(uuid())
+  label    String     @unique
+  absences Absences[] @relation("type")
 }
 
 /**

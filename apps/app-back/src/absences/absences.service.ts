@@ -7,11 +7,24 @@ import { PrismaService } from "src/prisma/prisma.service";
 export class AbsencesService {
     constructor(private prisma: PrismaService) {}
 
-    createAbsence(data: Prisma.AbsencesCreateInput) {
-        return this.prisma.absences.create({ data })
+    async createAbsence(data: Prisma.AbsencesCreateManyInput) {
+        const foundId = await this.prisma.absType.findUnique({
+            where: {
+                typeId: data.typeId,
+            },
+        });
+        if(foundId){
+            console.log("le type existe")
+            return this.prisma.absences.create({ data })
+        }else{
+            console.log("le type n'existe pas")
+            return {error: "Le type n'existe pas"}
+        }
     }
 
-    getAbsences() {}
+    getAbsences() {
+        return this.prisma.absences.findMany();
+    }
 
     getAbsenceByType() {}
 

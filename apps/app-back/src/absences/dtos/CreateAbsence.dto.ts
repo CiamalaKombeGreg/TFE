@@ -8,8 +8,9 @@ export class CreateAbsenceDto {
     @IsNotEmpty()
     title: string;
     
+    @IsString()
     @IsNotEmpty()
-    type: $Enums.AbsType;
+    typeId: string;
 
     @IsNotEmpty()
     @IsDateString()
