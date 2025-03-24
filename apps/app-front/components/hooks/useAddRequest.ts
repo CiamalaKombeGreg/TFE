@@ -16,7 +16,7 @@ export const useAddRequest = (
         },
         body: JSON.stringify(data),
       };
-      const response = await fetch(`http://192.168.129.8:3000/absences`, settings);
+      const response = await fetch(process.env.EXPO_PUBLIC_API_HOLIDAY_TYPE || "http://localhost:3000/absences", settings);
       const fetchedData = await response.json();
       if(fetchedData.error){
         query.isError = true

@@ -4,6 +4,7 @@ const tabs = {
   Accueil: "index",
   Profil: "users/[id]",
   Form: "form/dischargeRequest",
+  Calendar: "calendar/Calendar"
 };
 
 const DrawerLayout = () => {
@@ -30,6 +31,13 @@ const DrawerLayout = () => {
           options={{
             drawerLabel: "Demander",
             title: "Demander",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.Calendar}
+          options={{
+            drawerLabel: "Calendrier",
+            title: "Calendrier",
           }}
         />
       </Drawer>

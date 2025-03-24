@@ -1,12 +1,12 @@
 import {useQuery, UseQueryOptions} from "@tanstack/react-query";
 
-export const useGetTypes = (
+export const useGetHolidays = (
   queryParams?: Omit<UseQueryOptions, "queryKey" | "queryFn">
 ) => {
   const query = useQuery({
     queryKey: ["holidays"],
     queryFn: async () => {
-      const response = await fetch(process.env.EXPO_PUBLIC_API_HOLIDAY_TYPE || "http://localhost:3000/types", {
+      const response = await fetch(process.env.EXPO_PUBLIC_API_HOLIDAY_TYPE || "http://localhost:3000/absences", {
         method: "GET",
         headers: {
         'Accept': 'application/json',
