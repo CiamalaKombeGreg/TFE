@@ -6,7 +6,7 @@ export const useAddRequest = (
   queryParams?: Omit<UseQueryOptions, "queryKey" | "queryFn">
 ) => {
   const query = useQuery({
-    queryKey: ["holiday", data],
+    queryKey: ["holidays", data],
     queryFn: async () => {
       const settings = {
         method: 'POST',
@@ -16,7 +16,7 @@ export const useAddRequest = (
         },
         body: JSON.stringify(data),
       };
-      const response = await fetch(process.env.EXPO_PUBLIC_API_HOLIDAY_TYPE || "http://localhost:3000/absences", settings);
+      const response = await fetch(process.env.EXPO_PUBLIC_API_HOLIDAY_TYPE ?? "http://localhost:3000/absences", settings);
       const fetchedData = await response.json();
       if(fetchedData.error){
         query.isError = true

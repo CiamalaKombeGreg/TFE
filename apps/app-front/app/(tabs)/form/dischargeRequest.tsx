@@ -36,9 +36,9 @@ const newRequest = async (data: { title: string; startDate: Date; endDate: Date;
       const fetchedData = await response.json();
 
       if(fetchedData){
-        console.log("Success : "+ fetchedData)
+        console.log("Success")
       }else{
-        console.log("Failure : "+ fetchedData)
+        console.log("Failure")
       }
 
 };
@@ -98,7 +98,7 @@ const DischargeRequest = () => {
    const mutation = useMutation({
         mutationFn: newRequest,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["holiday"] });
+            queryClient.invalidateQueries({ queryKey: ["holidays"] });
         },
     });
 

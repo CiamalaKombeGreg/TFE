@@ -4,9 +4,9 @@ export const useGetTypes = (
   queryParams?: Omit<UseQueryOptions, "queryKey" | "queryFn">
 ) => {
   const query = useQuery({
-    queryKey: ["holidays"],
+    queryKey: ["types"],
     queryFn: async () => {
-      const response = await fetch(process.env.EXPO_PUBLIC_API_HOLIDAY_TYPE || "http://localhost:3000/types", {
+      const response = await fetch(process.env.EXPO_PUBLIC_API_HOLIDAY_TYPE ?? "http://localhost:3000/types", {
         method: "GET",
         headers: {
         'Accept': 'application/json',

@@ -1,4 +1,8 @@
 import {useQuery, UseQueryOptions} from "@tanstack/react-query";
+import { getDatesPeriode } from "@/lib/getHolidayPeriod";
+
+// Themes
+import { unknownTheme } from "@/lib/MarkedTheme";
 
 export const useGetHolidays = (
   queryParams?: Omit<UseQueryOptions, "queryKey" | "queryFn">
@@ -6,7 +10,7 @@ export const useGetHolidays = (
   const query = useQuery({
     queryKey: ["holidays"],
     queryFn: async () => {
-      const response = await fetch(process.env.EXPO_PUBLIC_API_HOLIDAY_TYPE || "http://localhost:3000/absences", {
+      const response = await fetch(process.env.EXPO_PUBLIC_API_REQUEST_HOLIDAY ?? "http://localhost:3000/absences", {
         method: "GET",
         headers: {
         'Accept': 'application/json',
@@ -14,10 +18,30 @@ export const useGetHolidays = (
         },
       });
       const fetchedData = await response.json();
+      const newFetchedData: any = {};
       if(fetchedData.error){
         query.isError = true
+      }else{
+        for(let item of fetchedData){
+          const startTimestamp = new Date(item.startDate);
+          const endTimestamp = new Date(item.endDate);
+          const dates = getDatesPeriode(startTimestamp, endTimestamp);
+
+          for (let i of dates) {
+                const dateString = new Date(i).toISOString().split('T')[0];
+                newFetchedData[dateString] = {
+                  selected: true,
+                  selectedColor: 'gray',
+                  marked: true,
+                  dotColor: 'red',
+                  selectedTextColor: 'red'
+
+              };
+          }
+        }
       }
-      return fetchedData;
+
+      return newFetchedData;
     },
     ...queryParams,
   });
