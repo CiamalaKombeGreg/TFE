@@ -1,32 +1,30 @@
-import { router } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import {ActivityIndicator, Button, Text, View} from "react-native";
+import {useAuth} from "@/context/auth";
+import LoginForm from "%/LoginForm";
 
 const Index = () => {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Empty for now...</Text>
-      <Pressable
-        onPress={() =>
-          router.push({ pathname: "/users/[id]", params: { id: "1" } })
-        }
-      >
-        <Text>Go to profil 1</Text>
-      </Pressable>
-      <Pressable
-        onPress={() =>
-          router.push({ pathname: "/users/[id]", params: { id: "2" } })
-        }
-      >
-        <Text>Go to profil 2</Text>
-      </Pressable>
-    </View>
-  );
+    const {user, isLoading, signOut} = useAuth();
+
+    if(isLoading) {
+        return <View className="flex justify-center items-center"><ActivityIndicator /></View>
+    }
+
+    if(!user){
+        return <LoginForm />
+    }
+
+      return (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+            <Text>{JSON.stringify(user)}</Text>
+            <Button title="Sign out" onPress={() => signOut()} />
+        </View>
+      );
 };
 
 export default Index;

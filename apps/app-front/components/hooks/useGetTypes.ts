@@ -6,7 +6,8 @@ export const useGetTypes = (
   const query = useQuery({
     queryKey: ["types"],
     queryFn: async () => {
-      const response = await fetch(process.env.EXPO_PUBLIC_API_HOLIDAY_TYPE ?? "http://localhost:3000/types", {
+      const api_key = process.env.EXPO_PRIVATE_BASE_URL
+      const response = await fetch(api_key ? `${api_key}/types` : "http://localhost:3000/types", {
         method: "GET",
         headers: {
         'Accept': 'application/json',
