@@ -16,7 +16,7 @@ export const useAddRequest = (
         },
         body: JSON.stringify(data),
       };
-      const api_key = process.env.EXPO_PRIVATE_BASE_URL
+      const api_key = process.env.EXPO_PUBLIC_SERVER_URL
       const response = await fetch(api_key ? `${api_key}/absences` : "http://localhost:3000/absences", settings);
       const fetchedData = await response.json();
       if(fetchedData.error){

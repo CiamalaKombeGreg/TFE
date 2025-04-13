@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as jose from 'jose';
 import {
     AuthError,
     AuthRequestConfig,
@@ -7,7 +8,8 @@ import {
     makeRedirectUri,
     useAuthRequest
 } from "expo-auth-session"
-import {BASE_URL} from "@/lib/constants";
+import {BASE_URL, TOKEN_KEY_NAME} from "@/lib/constants";
+import { TokenCache } from '@/utils/cache';
 
 export type AuthUser = {
     id: string;
@@ -27,7 +29,7 @@ const AuthContext = React.createContext({
     user: null as AuthUser | null,
     signIn: () => {},
     signOut: () => {},
-    fetchWithAuth: async (url: string, options?: RequestInit) => Promise.resolve(new Response()),
+    fetchWithAuth: (url: string, options: RequestInit) => Promise.resolve(new Response()),
     isLoading: false,
     error: null as AuthError | null,
 })
@@ -55,7 +57,40 @@ export const AuthProvider = ({ children }: {children: React.ReactNode}) => {
         handleResponse()
             .then(r => console.log("Handling success", r))
             .finally(() => console.log("Handling finished"));
-    }, [Response]);
+    }, [response]);
+
+    React.useEffect(() => {
+        const restoreSession = async () => {
+            try {
+                const storedAccessToken = await TokenCache?.getToken(TOKEN_KEY_NAME);
+
+                if(storedAccessToken){
+                    try {
+                        const decoded = jose.decodeJwt(storedAccessToken)
+                        const exp = (decoded as any).exp;
+                        const now = Math.floor(Date.now() / 1000);
+                        
+                        if(exp && exp > now){
+                            setAccessToken(storedAccessToken)
+                            setUser(decoded as AuthUser)
+                        } else {
+                            setUser(null);
+                            TokenCache?.deleteToken(TOKEN_KEY_NAME)
+                        }
+                    } catch (error) {
+                        console.log(error)
+                    }
+                }else{
+                    console.log("User isn't authenticated")
+                }
+            } catch (error) {
+                console.log(error)
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        restoreSession();
+    }, [])
 
     const handleResponse = async () => {
         if(response?.type === "success"){
@@ -74,8 +109,21 @@ export const AuthProvider = ({ children }: {children: React.ReactNode}) => {
 
                 const accessToken = tokenResponse.accessToken;
 
+                if(!accessToken){
+                    console.log("No access token found.")
+                    return;
+                }
+
                 setAccessToken(accessToken);
 
+                console.log(accessToken);
+
+                // Save the token to local storage
+                TokenCache?.saveToken(TOKEN_KEY_NAME, accessToken)
+
+                // get user info
+                const decoded = jose.decodeJwt(accessToken)
+                setUser(decoded as AuthUser)
             }catch(e){
                 console.log(e);
             }finally{
@@ -101,9 +149,25 @@ export const AuthProvider = ({ children }: {children: React.ReactNode}) => {
         }
     };
 
-    const signOut = async () => {};
+    const signOut = async () => {
+        await TokenCache?.deleteToken("accessToken");
 
-    const fetchWithAuth = async (url: string, options?: RequestInit) => {};
+        // Clear state
+        setUser(null);
+        setAccessToken("");
+    };
+
+    const fetchWithAuth = async (url: string, options: RequestInit) => {
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                ...options.headers,
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
+
+        return response;
+    };
 
     return <AuthContext.Provider value={
         {

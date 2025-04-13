@@ -6,7 +6,7 @@ export const useGetTypes = (
   const query = useQuery({
     queryKey: ["types"],
     queryFn: async () => {
-      const api_key = process.env.EXPO_PRIVATE_BASE_URL
+      const api_key = process.env.EXPO_PUBLIC_SERVER_URL
       const response = await fetch(api_key ? `${api_key}/types` : "http://localhost:3000/types", {
         method: "GET",
         headers: {

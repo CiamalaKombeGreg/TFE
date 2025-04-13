@@ -10,7 +10,7 @@ export const useGetHolidays = (
   const query = useQuery({
     queryKey: ["holidays"],
     queryFn: async () => {
-      const api_key = process.env.EXPO_PRIVATE_BASE_URL
+      const api_key = process.env.EXPO_PUBLIC_SERVER_URL
       const response = await fetch(api_key ? `${api_key}/absences` : "http://localhost:3000/absences", {
         method: "GET",
         headers: {

@@ -13,18 +13,18 @@ const Index = () => {
         return <LoginForm />
     }
 
-      return (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-            <Text>{JSON.stringify(user)}</Text>
-            <Button title="Sign out" onPress={() => signOut()} />
-        </View>
-      );
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+          <Text>{JSON.stringify(user)}</Text>
+          <Button title="Sign out" onPress={signOut} />
+      </View>
+    );
 };
 
 export default Index;
