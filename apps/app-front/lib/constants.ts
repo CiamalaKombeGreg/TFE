@@ -1,0 +1,4 @@
+// GOOGLE
+export const GOOGLE_ANDROID_KEY = process.env.EXPO_PUBLIC_GOOGLE_ANDROID
+export const GOOGLE_IOS_KEY = process.env.EXPO_PUBLIC_GOOGLE_IOS
+export const GOOGLE_WEB_KEY = process.env.EXPO_PUBLIC_GOOGLE_WEB
