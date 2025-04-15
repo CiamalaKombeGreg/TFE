@@ -1,17 +1,10 @@
 import {ActivityIndicator, Button, Text, View} from "react-native";
-import {useAuth} from "@/context/auth";
-import LoginForm from "%/LoginForm";
+import {
+  GoogleSignin,
+} from '@react-native-google-signin/google-signin';
+import * as React from "react"
 
 const Index = () => {
-    const {user, isLoading, signOut} = useAuth();
-
-    if(isLoading) {
-        return <View className="flex justify-center items-center"><ActivityIndicator /></View>
-    }
-
-    if(!user){
-        return <LoginForm />
-    }
 
     return (
       <View
@@ -21,8 +14,7 @@ const Index = () => {
           alignItems: "center",
         }}
       >
-          <Text>{JSON.stringify(user)}</Text>
-          <Button title="Sign out" onPress={signOut} />
+          <Text></Text>
       </View>
     );
 };
