@@ -14,3 +14,16 @@ export interface AuthResponse {
   serverAuthCode: string;
   user: User;
 }
+
+// Holidays
+export interface Holiday {
+  absId: string;
+  commentaire: string;
+  createAt: string;
+  endDate: string;
+  startDate: string;
+  status: string;
+  title: string;
+  typeId: string;
+  updateAt: string;
+}

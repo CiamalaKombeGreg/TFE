@@ -33,7 +33,8 @@ const tabs = {
   Accueil: "index",
   Profil: "users/[id]",
   Form: "form/dischargeRequest",
-  Calendar: "calendar/Calendar"
+  Calendar: "calendar/Calendar",
+  SelfHolidays: "Requests/MyHolidays",
 };
 
 const DrawerLayout = () => {
@@ -136,6 +137,14 @@ const DrawerLayout = () => {
             headerRight: () => <CustomHeader />,
             drawerLabel: "Calendrier",
             title: "Calendrier",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.SelfHolidays}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Mes congés",
+            title: "Mes congés",
           }}
         />
       </Drawer>
