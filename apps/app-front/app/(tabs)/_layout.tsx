@@ -1,10 +1,8 @@
 import { Drawer } from "expo-router/drawer";
 import * as WebBrowser from "expo-web-browser";
-import AsyncStorage from "@react-native-async-storage/async-storage"
 import * as React from "react"
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GOOGLE_ANDROID_KEY, GOOGLE_IOS_KEY, GOOGLE_WEB_KEY } from "@/lib/constants";
-import { useRouter } from 'expo-router';
 import {
   Button,
   Text,
@@ -17,6 +15,7 @@ import {
   isSuccessResponse,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+import { notifyManager } from "@tanstack/react-query";
 
 
 WebBrowser.maybeCompleteAuthSession();
@@ -31,10 +30,11 @@ GoogleSignin.configure({
 
 const tabs = {
   Accueil: "index",
-  Profil: "users/[id]",
+  Profil: "users/user",
   Form: "form/dischargeRequest",
   Calendar: "calendar/Calendar",
   SelfHolidays: "Requests/MyHolidays",
+  idHoliday: "Requests/[id]"
 };
 
 const DrawerLayout = () => {
@@ -145,6 +145,15 @@ const DrawerLayout = () => {
             headerRight: () => <CustomHeader />,
             drawerLabel: "Mes congés",
             title: "Mes congés",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.idHoliday}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Congé spécifique",
+            drawerItemStyle: {display: 'none'},
+            title: "Congé spécifique",
           }}
         />
       </Drawer>

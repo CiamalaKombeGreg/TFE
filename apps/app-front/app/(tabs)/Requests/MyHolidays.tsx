@@ -19,7 +19,7 @@ const MyHolidays = () => {
             <View className="flex flex-col items-stretch justify-start bg-gray-400 h-[80%] w-[90%] m-2 rounded-xl shadow-xl border border-black">
                 <Text className="text-white text-center bg-black rounded-t-xl h-8">Liste</Text>
                 {typeof holidays === "object" && Array.isArray(holidays) && holidays?.map((element: Holiday) =>
-                        <MHCard key={element.absId} title={element.title} status={element.status} beginDate={new Date(element.startDate)} endDate={new Date(element.endDate)} />
+                        <MHCard key={element.absId} id={element.absId} title={element.title} status={element.status} beginDate={new Date(element.startDate)} endDate={new Date(element.endDate)} />
                     )}
             </View>
         </SafeAreaView>

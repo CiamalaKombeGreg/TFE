@@ -3,15 +3,12 @@
  */
 
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import { useLocalSearchParams } from "expo-router";
 import React from "react";
 import { AuthResponse } from "@/lib/types";
 import { Image, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const ProfilPage = () => {
-  const { id } = useLocalSearchParams<{ id: string }>(); //Take the parameters send from another element
-
   const [userInfo, setUserInfo] = React.useState<AuthResponse | null>(null);
   
   const getCurrentUser = async () => {
