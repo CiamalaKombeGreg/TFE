@@ -2,6 +2,7 @@ import { Drawer } from "expo-router/drawer";
 import * as WebBrowser from "expo-web-browser";
 import * as React from "react"
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { GOOGLE_ANDROID_KEY, GOOGLE_IOS_KEY, GOOGLE_WEB_KEY } from "@/lib/constants";
 import {
   Button,
@@ -15,7 +16,7 @@ import {
   isSuccessResponse,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
-import { notifyManager } from "@tanstack/react-query";
+import {AuthResponse} from "@/lib/types";
 
 
 WebBrowser.maybeCompleteAuthSession();
@@ -37,14 +38,48 @@ const tabs = {
   idHoliday: "Requests/[id]"
 };
 
+const ValidateAuth = async (data: { idToken : string, email: string }) => {
+    const requestData = {
+        email: data.email,
+        token: data.idToken,
+    };
+
+    const settings = {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+    };
+    const response = await fetch(process.env.EXPO_PRIVATE_BASE_URL+"/auth" || "http://localhost:3000/auth", settings);
+
+    const fetchedData = await response.json();
+
+
+};
+
 const DrawerLayout = () => {
-  const [userInfo, setUserInfo] = React.useState<object | null>(null);
+  const [userInfo, setUserInfo] = React.useState<AuthResponse | null>(null);
+  const queryClient = useQueryClient();
 
   const links = Object.values(tabs);
+
+  /* ---------------------------- AUTHENTICATION ---------------------------- */
 
   if(!GOOGLE_ANDROID_KEY || !GOOGLE_IOS_KEY){
     throw new Error("Missing google keys.")
   }
+
+    const mutation = useMutation({
+        mutationFn: ValidateAuth,
+        onSuccess: () => {
+            // Something when it works
+        },
+        onError: () => {
+            // Something when it fails
+        }
+    });
 
   const signIn = async () => {
     try {
@@ -82,6 +117,8 @@ const DrawerLayout = () => {
     }
   };
 
+    /* ---------------------------- HEADER ---------------------------- */
+
   const CustomHeader = () => {
 
     return (
@@ -92,6 +129,8 @@ const DrawerLayout = () => {
       </View>
     );
   };
+
+    /* ---------------------------- DISPLAY ---------------------------- */
 
   if(!userInfo){
     return (

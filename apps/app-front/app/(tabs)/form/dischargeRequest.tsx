@@ -15,7 +15,7 @@ import { ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const newRequest = async (data: { title: string; startDate: Date; endDate: Date; comment: string; type: string; }) => {
-    var requestData = {
+    const requestData = {
       title: data.title,
       startDate: data.startDate,
       endDate: data.endDate,
@@ -31,7 +31,7 @@ const newRequest = async (data: { title: string; startDate: Date; endDate: Date;
         },
         body: JSON.stringify(requestData),
       };
-      const response = await fetch(process.env.EXPO_PUBLIC_API_REQUEST_HOLIDAY || "http://localhost:3000/absences", settings);
+      const response = await fetch(process.env.EXPO_PRIVATE_BASE_URL+"/absences" || "http://localhost:3000/absences", settings);
 
       const fetchedData = await response.json();
 

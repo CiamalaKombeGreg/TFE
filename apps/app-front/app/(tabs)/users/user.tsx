@@ -31,7 +31,7 @@ const ProfilPage = () => {
         <View className="flex items-center">
           <Image
             className="h-32 w-32 rounded-full object-cover"
-            src={userInfo.user.photo}
+            src={userInfo.user.photo ?? ""}
             alt="Profile Picture"
           />
         </View>
