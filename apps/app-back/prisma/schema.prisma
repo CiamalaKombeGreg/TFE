@@ -60,21 +60,15 @@ enum Status {
  */
 
 model Personnel {
-  prsId             String        @id @default(uuid())
-  prenom            String
-  nom               String
-  email             String        @unique
-  role              Role[] // Rôle dans l'entreprise
-  notifications     String[] // Notifications garder en database sur l'application
-  total_cl          Int? // Nombre de congés légaux sur l'année
-  total_cel         Int? // Nombre de congés extra-légaux sur l'année
-  total_teletravail Int? // Nombre de jour de télétravail sur la semaine
-  total_jfr         Int? // Nombre de jours férié reporté (Fonctionne comme les congé)
-  supervisor        Supervision[] @relation("superviseur") // Liste des gens qui supervise la personne
-  supervise         Supervision[] @relation("supervise") // Liste des gens que la personne supervise
-  conges            Conge[]       @relation("personnel")
-
-  @@unique([prenom, nom])
+  prsId         String           @id @default(uuid())
+  pseudo        String           @unique
+  email         String           @unique
+  role          Role[] // Rôle dans l'entreprise
+  notifications String[] // Notifications garder en database sur l'application
+  totalConge    AllowedHoliday[] @relation("allowedPersonnel") // Liste des congés restants par types
+  supervisor    Supervision[]    @relation("superviseur") // Liste des gens qui supervise la personne
+  supervise     Supervision[]    @relation("supervise") // Liste des gens que la personne supervise
+  conges        Conge[]          @relation("personnel")
 }
 
 //-------------------------------------------------------------------------------//
@@ -117,9 +111,10 @@ model Absences {
 // EXCEPTIONNEL
 
 model AbsType {
-  typeId   String     @id @default(uuid())
-  label    String     @unique
-  absences Absences[] @relation("type")
+  typeId           String           @id @default(uuid())
+  label            String           @unique
+  totalOnPersonnel AllowedHoliday[] @relation("allowedTypes")
+  absences         Absences[]       @relation("type")
 }
 
 /**
@@ -152,4 +147,21 @@ model Conge {
   absenceId   String
 
   @@id([personnelId, absenceId])
+}
+
+//-------------------------------------------------------------------------------//
+
+/**
+ * Table intermédiaire entre un personnel et un conge, relartion many to many donc table INTERMEDIAIRE
+ * - La valeur par défaut de jours restant est 365, ce cas est prit comme n'ayant pas de limite de jours
+ */
+
+model AllowedHoliday {
+  personnel     Personnel @relation("allowedPersonnel", fields: [personnelId], references: [prsId])
+  personnelId   String
+  type          AbsType   @relation("allowedTypes", fields: [typeId], references: [typeId])
+  typeId        String
+  remainingDays Int?      @default(365)
+
+  @@id([personnelId, typeId])
 }

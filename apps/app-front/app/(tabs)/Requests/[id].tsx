@@ -2,7 +2,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { Text, SafeAreaView, ActivityIndicator, View, TouchableOpacity, Pressable } from 'react-native';
 import { useGetHolidaysById } from '@/components/hooks/useGetHolidaysById';
 import { useState } from 'react';
-import { Modal } from '@/components/element/RequestsId/modal';
+import { Modal } from '@/components/element/RequestsId/Modal';
 import { useDeleteHoliday } from '@/components/hooks/useDeleteHoliday';
 import { useRouter } from 'expo-router';
 

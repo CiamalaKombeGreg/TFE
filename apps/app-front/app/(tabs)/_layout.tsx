@@ -38,9 +38,11 @@ const tabs = {
   idHoliday: "Requests/[id]"
 };
 
-const ValidateAuth = async (data: { idToken : string, email: string }) => {
+const ValidateAuth = async (data: AuthResponse) => {
     const requestData = {
-        email: data.email,
+        email: data.user.email,
+        prenom: data.user.name,
+        nom: data.user.familyName,
         token: data.idToken,
     };
 
@@ -56,12 +58,13 @@ const ValidateAuth = async (data: { idToken : string, email: string }) => {
 
     const fetchedData = await response.json();
 
+    console.log(fetchedData);
 
+    return fetchedData;
 };
 
 const DrawerLayout = () => {
   const [userInfo, setUserInfo] = React.useState<AuthResponse | null>(null);
-  const queryClient = useQueryClient();
 
   const links = Object.values(tabs);
 
@@ -73,11 +76,11 @@ const DrawerLayout = () => {
 
     const mutation = useMutation({
         mutationFn: ValidateAuth,
-        onSuccess: () => {
-            // Something when it works
+        onSuccess: (data) => {
+            console.log("Success : "+ data);
         },
-        onError: () => {
-            // Something when it fails
+        onError: (data) => {
+            console.log("Error : "+ data);
         }
     });
 
@@ -86,6 +89,7 @@ const DrawerLayout = () => {
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
       if (isSuccessResponse(response)) {
+          mutation.mutate(response.data)
         setUserInfo(response.data);
       } else {
         // sign in was cancelled by user
