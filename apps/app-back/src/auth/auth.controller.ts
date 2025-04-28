@@ -7,7 +7,7 @@ export class AuthController {
 
   @Post()
   create(
-    @Body() data: { email: string; token: string; prenom: string; nom: string },
+    @Body() data: { email: string; token: string; nom: string },
   ) {
     return this.authService.getAuthResponse(data);
   }

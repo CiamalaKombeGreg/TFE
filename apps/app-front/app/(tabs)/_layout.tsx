@@ -41,8 +41,7 @@ const tabs = {
 const ValidateAuth = async (data: AuthResponse) => {
     const requestData = {
         email: data.user.email,
-        prenom: data.user.name,
-        nom: data.user.familyName,
+        nom: data.user.name,
         token: data.idToken,
     };
 
@@ -88,8 +87,8 @@ const DrawerLayout = () => {
     try {
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
+      console.log(response.data?.idToken);
       if (isSuccessResponse(response)) {
-          mutation.mutate(response.data)
         setUserInfo(response.data);
       } else {
         // sign in was cancelled by user

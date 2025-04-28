@@ -9,7 +9,6 @@ export class AuthService {
   async getAuthResponse(data: {
     email: string;
     token: string;
-    prenom: string;
     nom: string;
   }) {
     try {
