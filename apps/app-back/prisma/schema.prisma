@@ -79,6 +79,10 @@ model Personnel {
  * - A voir, mais une pièce jointe peuvent être rajouter si le congé est EXCEPTIONNEL ou MALADIE (déclaration de congé)
  */
 
+/**
+ * REDUCE IT TO ONE-TO MANY, ONE PERSON WITH MANY ABSENCE BUT EACH ABSENCE HAVE ONE PERSON
+ */
+
 model Absences {
   absId       String   @id @default(uuid())
   title       String
@@ -109,6 +113,10 @@ model Absences {
 // SANSSOLDE - Congé pouvant être demander sans motif particulier
 // MALADIE
 // EXCEPTIONNEL
+
+/**
+ * ONLY HAD INDIVIDUAL TYPE AND INTEGRATE EVERY FERIE USING EXTERNAL API
+ */
 
 model AbsType {
   typeId           String           @id @default(uuid())
