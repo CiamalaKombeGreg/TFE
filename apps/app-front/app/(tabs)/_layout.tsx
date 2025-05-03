@@ -53,17 +53,16 @@ const ValidateAuth = async (data: AuthResponse) => {
         },
         body: JSON.stringify(requestData),
     };
-    const response = await fetch(process.env.EXPO_PRIVATE_BASE_URL+"/auth" || "http://localhost:3000/auth", settings);
+    const response = await fetch(process.env.EXPO_PUBLIC_SERVER_URL+"/auth" || "http://localhost:3000/auth", settings);
 
     const fetchedData = await response.json();
-
-    console.log(fetchedData);
 
     return fetchedData;
 };
 
 const DrawerLayout = () => {
   const [userInfo, setUserInfo] = React.useState<AuthResponse | null>(null);
+  const [verifiedEmail, setVerifiedEmail] = React.useState<boolean>(false)
 
   const links = Object.values(tabs);
 
@@ -77,9 +76,11 @@ const DrawerLayout = () => {
         mutationFn: ValidateAuth,
         onSuccess: (data) => {
             console.log("Success : "+ data);
+            setVerifiedEmail(true)
         },
         onError: (data) => {
             console.log("Error : "+ data);
+            // Error page
         }
     });
 
@@ -87,9 +88,11 @@ const DrawerLayout = () => {
     try {
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
-      console.log(response.data?.idToken);
       if (isSuccessResponse(response)) {
-        setUserInfo(response.data);
+        mutation.mutate(response.data)
+        if(verifiedEmail){
+          setUserInfo(response.data);
+        }
       } else {
         // sign in was cancelled by user
       }
