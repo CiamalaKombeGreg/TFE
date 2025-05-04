@@ -14,10 +14,8 @@ export class AbsencesService {
             },
         });
         if(foundId){
-            console.log("le type existe")
             return this.prisma.absences.create({ data })
         }else{
-            console.log("le type n'existe pas")
             return {error: "Le type n'existe pas"}
         }
     }

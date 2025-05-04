@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -12,8 +13,6 @@ export class AuthService {
       );
       const result = await response.json();
 
-      console.log(result);
-
       if (
         typeof result === 'object' &&
         result !== null &&
@@ -22,6 +21,9 @@ export class AuthService {
       ) {
         const findPersonnel = await this.prisma.personnel.findUnique({
           where: { email: result.email },
+          select: {
+            conges: true,
+          }
         });
 
         if (findPersonnel) {

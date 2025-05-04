@@ -61,7 +61,6 @@ const ValidateAuth = async (data: AuthResponse) => {
 };
 
 const DrawerLayout = () => {
-  const [userInfo, setUserInfo] = React.useState<AuthResponse | null>(null);
   const [verifiedEmail, setVerifiedEmail] = React.useState<boolean>(false)
 
   const links = Object.values(tabs);
@@ -90,9 +89,6 @@ const DrawerLayout = () => {
       const response = await GoogleSignin.signIn();
       if (isSuccessResponse(response)) {
         mutation.mutate(response.data)
-        if(verifiedEmail){
-          setUserInfo(response.data);
-        }
       } else {
         // sign in was cancelled by user
       }
@@ -117,7 +113,7 @@ const DrawerLayout = () => {
   const signOut = async () => {
     try {
       await GoogleSignin.signOut();
-      setUserInfo(null); // Remember to remove the user from your app's state as well
+      setVerifiedEmail(false); // Remember to remove the user from your app's state as well
     } catch (error) {
       console.error(error);
     }
@@ -138,7 +134,7 @@ const DrawerLayout = () => {
 
     /* ---------------------------- DISPLAY ---------------------------- */
 
-  if(!userInfo){
+  if(!verifiedEmail){
     return (
       <>
         <SafeAreaView>
