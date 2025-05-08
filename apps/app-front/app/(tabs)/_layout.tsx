@@ -1,10 +1,9 @@
 import { Drawer } from "expo-router/drawer";
 import * as WebBrowser from "expo-web-browser";
-import AsyncStorage from "@react-native-async-storage/async-storage"
 import * as React from "react"
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { GOOGLE_ANDROID_KEY, GOOGLE_IOS_KEY, GOOGLE_WEB_KEY } from "@/lib/constants";
-import { useRouter } from 'expo-router';
 import {
   Button,
   Text,
@@ -17,6 +16,7 @@ import {
   isSuccessResponse,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+import {AuthResponse} from "@/lib/types";
 
 
 WebBrowser.maybeCompleteAuthSession();
@@ -31,26 +31,64 @@ GoogleSignin.configure({
 
 const tabs = {
   Accueil: "index",
-  Profil: "users/[id]",
+  Profil: "users/user",
   Form: "form/dischargeRequest",
-  Calendar: "calendar/Calendar"
+  Calendar: "calendar/Calendar",
+  SelfHolidays: "Requests/MyHolidays",
+  idHoliday: "Requests/[id]"
+};
+
+const ValidateAuth = async (data: AuthResponse) => {
+    const requestData = {
+        email: data.user.email,
+        nom: data.user.name,
+        token: data.idToken,
+    };
+
+    const settings = {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+    };
+    const response = await fetch(process.env.EXPO_PUBLIC_SERVER_URL+"/auth" || "http://localhost:3000/auth", settings);
+
+    const fetchedData = await response.json();
+
+    return fetchedData;
 };
 
 const DrawerLayout = () => {
-  const [userInfo, setUserInfo] = React.useState<object | null>(null);
+  const [verifiedEmail, setVerifiedEmail] = React.useState<boolean>(false)
 
   const links = Object.values(tabs);
+
+  /* ---------------------------- AUTHENTICATION ---------------------------- */
 
   if(!GOOGLE_ANDROID_KEY || !GOOGLE_IOS_KEY){
     throw new Error("Missing google keys.")
   }
+
+    const mutation = useMutation({
+        mutationFn: ValidateAuth,
+        onSuccess: (data) => {
+            console.log("Success : "+ data);
+            setVerifiedEmail(true)
+        },
+        onError: (data) => {
+            console.log("Error : "+ data);
+            // Error page
+        }
+    });
 
   const signIn = async () => {
     try {
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
       if (isSuccessResponse(response)) {
-        setUserInfo(response.data);
+        mutation.mutate(response.data)
       } else {
         // sign in was cancelled by user
       }
@@ -75,11 +113,13 @@ const DrawerLayout = () => {
   const signOut = async () => {
     try {
       await GoogleSignin.signOut();
-      setUserInfo(null); // Remember to remove the user from your app's state as well
+      setVerifiedEmail(false); // Remember to remove the user from your app's state as well
     } catch (error) {
       console.error(error);
     }
   };
+
+    /* ---------------------------- HEADER ---------------------------- */
 
   const CustomHeader = () => {
 
@@ -92,7 +132,9 @@ const DrawerLayout = () => {
     );
   };
 
-  if(!userInfo){
+    /* ---------------------------- DISPLAY ---------------------------- */
+
+  if(!verifiedEmail){
     return (
       <>
         <SafeAreaView>
@@ -136,6 +178,23 @@ const DrawerLayout = () => {
             headerRight: () => <CustomHeader />,
             drawerLabel: "Calendrier",
             title: "Calendrier",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.SelfHolidays}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Mes congés",
+            title: "Mes congés",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.idHoliday}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Congé spécifique",
+            drawerItemStyle: {display: 'none'},
+            title: "Congé spécifique",
           }}
         />
       </Drawer>

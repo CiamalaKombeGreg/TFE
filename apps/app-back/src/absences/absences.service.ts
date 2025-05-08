@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Injectable } from "@nestjs/common";
+import { HttpException, Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 
@@ -14,10 +14,8 @@ export class AbsencesService {
             },
         });
         if(foundId){
-            console.log("le type existe")
             return this.prisma.absences.create({ data })
         }else{
-            console.log("le type n'existe pas")
             return {error: "Le type n'existe pas"}
         }
     }
@@ -26,9 +24,21 @@ export class AbsencesService {
         return this.prisma.absences.findMany();
     }
 
-    getAbsenceByType() {}
+    getAbsenceById(id: string) {
+        return this.prisma.absences.findUnique({
+            where: {
+                absId: id
+            },
+        });
+    }
 
-    getAbsenceById() {}
-
-    getAbsenceByPersonnel() {}
+    async deleteAbsenceById(id: string){
+        const findHoliday = await this.getAbsenceById(id);
+        if(!findHoliday) throw new HttpException("Holiday was not found", 404);
+        return this.prisma.absences.delete({
+            where: {
+                absId: id
+            }
+        })
+    }
 }

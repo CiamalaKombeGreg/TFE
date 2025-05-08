@@ -1,15 +1,14 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
+import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-  @Get('google/login')
-  handleLogin() {
-    return { msg: 'Google Authentication' };
-  }
+  constructor(private authService: AuthService) {}
 
-  // /auth/google/redirect
-  @Get('google/redirect')
-  handleRedirect() {
-    return { msg: 'Redirect To Login' };
+  @Post()
+  create(
+    @Body() data: { email: string; token: string; nom: string },
+  ) {
+    return this.authService.getAuthResponse(data);
   }
 }

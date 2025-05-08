@@ -13,14 +13,20 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useGetTypes } from "@/components/hooks/useGetTypes";
 import { ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { AuthResponse } from "@/lib/types";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { getIdByEmail } from "@/lib/getIdByEmail";
 
-const newRequest = async (data: { title: string; startDate: Date; endDate: Date; comment: string; type: string; }) => {
-    var requestData = {
+const newRequest = async (data: { title: string; startDate: Date; endDate: Date; comment: string; type: string; prsId: string }) => {
+  const id = await getIdByEmail(data.prsId);
+
+    const requestData = {
       title: data.title,
       startDate: data.startDate,
       endDate: data.endDate,
       commentaire: data.comment,
-      typeId: data.type
+      typeId: data.type,
+      personnelId: id
     };
 
     const settings = {
@@ -31,7 +37,7 @@ const newRequest = async (data: { title: string; startDate: Date; endDate: Date;
         },
         body: JSON.stringify(requestData),
       };
-      const response = await fetch(process.env.EXPO_PUBLIC_API_REQUEST_HOLIDAY || "http://localhost:3000/absences", settings);
+      const response = await fetch(process.env.EXPO_PUBLIC_SERVER_URL+"/absences" || "http://localhost:3000/absences", settings);
 
       const fetchedData = await response.json();
 
@@ -44,6 +50,18 @@ const newRequest = async (data: { title: string; startDate: Date; endDate: Date;
 };
 
 const DischargeRequest = () => {
+  // On récupère l'utilisateur
+  const [userInfo, setUserInfo] = React.useState<AuthResponse | null>(null);
+    
+    const getCurrentUser = async () => {
+      const currentUser = GoogleSignin.getCurrentUser() as AuthResponse;
+      setUserInfo(currentUser);
+    };
+  
+    React.useEffect(() => {
+      getCurrentUser();
+    }, [])
+
   // Données à soumettre
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [endDate, setEndDate] = useState<Date>(new Date());
@@ -84,7 +102,9 @@ const DischargeRequest = () => {
     }
 
     // Envoyer les données du formulaire à votre serveur ici
-    mutation.mutate({ title, startDate, endDate, comment, type });
+    if(userInfo !== null){
+      mutation.mutate({ title, startDate, endDate, comment, type, prsId: userInfo.user.email });
+    }
 
     // Vider les champs après la soumission
     setTitle('');

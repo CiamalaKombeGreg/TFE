@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Get, Post, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, UsePipes, ValidationPipe } from "@nestjs/common";
 import { AbsencesService } from "./absences.service";
 import { CreateAbsenceDto } from "./dtos/CreateAbsence.dto";
 
@@ -16,5 +16,15 @@ export class AbsencesController {
     @Get()
     getAbsences(){
         return this.absencesService.getAbsences();
+    }
+
+    @Get(':id')
+    getAbsenceById(@Param('id') id: string){
+        return this.absencesService.getAbsenceById(id);
+    }
+
+    @Delete(':id')
+    deleteHolidayById(@Param('id') id: string){
+        return this.absencesService.deleteAbsenceById(id)
     }
 }
