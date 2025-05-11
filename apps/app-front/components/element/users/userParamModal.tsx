@@ -14,6 +14,16 @@ export const UserModal = ({email, pseudo, roles, rolesList} : UserModalProps ) =
 
     const changeRole = (role: string) => {
         const newRoles = selectedRoles;
+        if(role in newRoles){
+            const index = newRoles.indexOf(role);
+            if (index > -1) { 
+                newRoles.splice(index, 1); // 
+            }
+        }else{
+            newRoles.push(role)
+        }
+
+        setSelectedRoles(newRoles);
     }
     
     return (
@@ -26,10 +36,21 @@ export const UserModal = ({email, pseudo, roles, rolesList} : UserModalProps ) =
             <View>
                 {rolesList.map((role) => (
                     <View>
-                        <Checkbox value={false} onValueChange={() => changeRole(role)} />
-                        <Text>Normal checkbox</Text>
+                        <Checkbox value={role in selectedRoles} onValueChange={() => changeRole(role)} />
+                        <Text>{role}</Text>
                     </View>
                 ))}
+            </View>
+            <View>
+                {/* sauvegarder les changement */}
+                <TouchableOpacity onPress={() => console.log("Save")}>
+                    <Text>Sauvegarder</Text>
+                </TouchableOpacity>
+
+                {/* effacer les changements */}
+                <TouchableOpacity onPress={() => console.log("Delete")}>
+                    <Text>Quitter</Text>
+                </TouchableOpacity>
             </View>
         </View>
     )
