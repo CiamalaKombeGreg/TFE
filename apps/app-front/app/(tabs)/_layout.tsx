@@ -35,7 +35,8 @@ const tabs = {
   Form: "form/dischargeRequest",
   Calendar: "calendar/Calendar",
   SelfHolidays: "Requests/MyHolidays",
-  idHoliday: "Requests/[id]"
+  idHoliday: "Requests/[id]",
+  userList: "users/usersList"
 };
 
 const ValidateAuth = async (data: AuthResponse) => {
@@ -195,6 +196,14 @@ const DrawerLayout = () => {
             drawerLabel: "Congé spécifique",
             drawerItemStyle: {display: 'none'},
             title: "Congé spécifique",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.userList}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Organisation",
+            title: "Organisation",
           }}
         />
       </Drawer>
