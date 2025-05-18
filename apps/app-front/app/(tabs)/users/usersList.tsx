@@ -6,12 +6,45 @@ import {useGetRoles} from "%/hooks/useGetRoles";
 import { useGetUsers } from "@/components/hooks/useGetUsers";
 import { UserModal } from "@/components/element/users/userParamModal";
 
+import { UsersListModal } from "@/lib/types";
+
 const UsersList = () => {
     const { data : roles, isLoading: isRolesLoading } = useGetRoles();
     const [list, setList] = useState<string>("ALL");
-    const { data : users, isLoading: isUsersLoading  } = useGetUsers(list);
-    const [info, setInfo] = useState<{email: string, pseudo: string, roles: string[]} | undefined>(undefined);
+    const { data : users, isLoading: isUsersLoading  } = useGetUsers();
+    const [allModal, setAllModal] = useState<UsersListModal[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
+    // Open modal for display user
+    const openModal = (item: UsersListModal) => {
+        for(let element of allModal){
+            if(element.email === item.email){
+                const newState : UsersListModal = {email : item.email, pseudo: item.pseudo, roles: item.roles, isOpen: !item.isOpen}
+                setAllModal(allModal.map((newItem) => generateNewModal({newItem : newState, currentItem : newItem})))
+            }
+        }
+        setIsModalOpen(true)
+    }
+
+    // Generate the new modal to set the new element
+    const generateNewModal = ({newItem, currentItem} : {newItem : UsersListModal, currentItem : UsersListModal}) => {
+        if(currentItem.email !== newItem.email){
+            return currentItem
+        } else {
+            return newItem
+        }
+    }
+
+    // Init first modal state
+    const initModal = (users: unknown) => {
+        const initAllModal : UsersListModal[] = []
+        if(Array.isArray(users)){
+            for(let element of users){
+                initAllModal.push({email : element?.email, pseudo: element?.pseudo, roles: element?.role, isOpen: false})
+            }
+            setAllModal(initAllModal)
+        }
+    }
     
 
     if(isRolesLoading || isUsersLoading) {
@@ -20,6 +53,9 @@ const UsersList = () => {
         )
     } else {
         const rolesArray = Object.keys(roles as object)
+        if(allModal.length === 0){
+            initModal(users)
+        }
         return (
             <SafeAreaView>
                 {/* Title */}
@@ -41,18 +77,19 @@ const UsersList = () => {
 
                 {/* Display users */}
                 <View>
-                    {Array.isArray(users) && users.map((user) => (
-                        <View>
+                    {allModal.map((user) => (
+                        <View id={user?.email}>
                             <Text>{user?.pseudo}</Text>
                             <Text>{user?.email}</Text>
-                            <TouchableOpacity onPress={() => setInfo({email: user?.email, pseudo: user?.pseudo, roles: user?.role})}><Text>Paramètre</Text></TouchableOpacity>
+                            <TouchableOpacity onPress={() => openModal(user)}><Text>Paramètre</Text></TouchableOpacity>
+                            {user.isOpen && <UserModal closeModal={openModal} setisModalOpen={setIsModalOpen} user={user} rolesList={rolesArray} />}
                         </View>
                     ))}
                 </View>
-                {info !== undefined && <UserModal email={info.email} pseudo={info.pseudo} roles={info.roles} rolesList={roles as string[]} />}
             </SafeAreaView>
         )
     }
 }
+
 
 export default UsersList;

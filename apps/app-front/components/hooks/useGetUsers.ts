@@ -1,14 +1,13 @@
 import {useQuery, UseQueryOptions} from "@tanstack/react-query";
 
 export const useGetUsers = (
-    list: string,
     queryParams?: Omit<UseQueryOptions, "queryKey" | "queryFn">
 ) => {
     const query = useQuery({
-        queryKey: ["users", list],
+        queryKey: ["users"],
         queryFn: async () => {
             const api_key = process.env.EXPO_PUBLIC_SERVER_URL
-            const response = await fetch(api_key ? `${api_key}/personnelClass/${list}` : `http://localhost:3000/personnelClass/${list}`, {
+            const response = await fetch(api_key ? `${api_key}/personnelClass` : `http://localhost:3000/personnelClass`, {
                 method: "GET",
                 headers: {
                     'Accept': 'application/json',

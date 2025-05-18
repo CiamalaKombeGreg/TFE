@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get, Param} from '@nestjs/common';
 import { PersonnelService } from './personnel.service';
-import { Role } from '@prisma/client';
 
 @Controller('personnel')
 export class PersonnelController {
@@ -17,8 +16,8 @@ export class PersonnelController {
 export class PersonnelClassController {
     constructor (private personnelService: PersonnelService) {}
 
-    @Get(':id')
-        getUserByClass(@Param('id') id: Role){
-            return this.personnelService.getUsers(id)
+    @Get()
+        getUserByClass(){
+            return this.personnelService.getUsers()
     }
 }

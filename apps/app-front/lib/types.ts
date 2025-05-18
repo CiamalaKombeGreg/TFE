@@ -27,3 +27,11 @@ export interface Holiday {
   typeId: string;
   updateAt: string;
 }
+
+// Modal in usersList
+export interface UsersListModal {
+  pseudo: string;
+  roles: string[]
+  email: string;
+  isOpen: boolean;
+}

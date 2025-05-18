@@ -1,23 +1,24 @@
 import { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native"
 import Checkbox from 'expo-checkbox';
+import { UsersListModal } from "@/lib/types";
 
 type UserModalProps = {
-    email: string;
-    pseudo: string;
-    roles: string[];
+    closeModal : any;
+    setisModalOpen : any;
+    user : UsersListModal;
     rolesList: string[];
 }
 
-export const UserModal = ({email, pseudo, roles, rolesList} : UserModalProps ) => {
-    const [selectedRoles, setSelectedRoles] = useState<string[]>(roles);
+export const UserModal = ({closeModal, setisModalOpen, user, rolesList} : UserModalProps ) => {
+    const [selectedRoles, setSelectedRoles] = useState<string[]>(user.roles);
 
     const changeRole = (role: string) => {
         const newRoles = selectedRoles;
         if(role in newRoles){
             const index = newRoles.indexOf(role);
             if (index > -1) { 
-                newRoles.splice(index, 1); // 
+                newRoles.splice(index, 1);
             }
         }else{
             newRoles.push(role)
@@ -29,13 +30,13 @@ export const UserModal = ({email, pseudo, roles, rolesList} : UserModalProps ) =
     return (
         <View>
             <View className="fixed">
-                <Text>{email}</Text>
-                <Text>{pseudo}</Text>
-                <Text>{roles}</Text>
+                <Text>{user.email}</Text>
+                <Text>{user.pseudo}</Text>
+                <Text>{user.roles}</Text>
             </View>
             <View>
                 {rolesList.map((role) => (
-                    <View>
+                    <View id={role}>
                         <Checkbox value={role in selectedRoles} onValueChange={() => changeRole(role)} />
                         <Text>{role}</Text>
                     </View>
@@ -48,7 +49,10 @@ export const UserModal = ({email, pseudo, roles, rolesList} : UserModalProps ) =
                 </TouchableOpacity>
 
                 {/* effacer les changements */}
-                <TouchableOpacity onPress={() => console.log("Delete")}>
+                <TouchableOpacity onPress={() => {
+                    closeModal(user)
+                    setisModalOpen(false)
+                }}>
                     <Text>Quitter</Text>
                 </TouchableOpacity>
             </View>
