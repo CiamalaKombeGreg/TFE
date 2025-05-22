@@ -5,6 +5,8 @@ import { UsersListModal } from "@/lib/types";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 type UserModalProps = {
+    currentViewer : string | undefined;
+    isAdminViewer : boolean;
     refresh: ({roles, email} : {roles : string[], email : string}) => void;
     closeModal : any;
     setisModalOpen : any;
@@ -37,7 +39,7 @@ const changeUserRoles = async ({email, roles} : {email : string, roles : string[
     return roles
 }
 
-export const UserModal = ({refresh, closeModal, setisModalOpen, user, rolesList} : UserModalProps ) => {
+export const UserModal = ({currentViewer, isAdminViewer, refresh, closeModal, setisModalOpen, user, rolesList} : UserModalProps ) => {
     const [selectedRoles, setSelectedRoles] = useState<string[]>(user.roles);
 
     const changeRole = (role: string) => {
@@ -95,9 +97,9 @@ export const UserModal = ({refresh, closeModal, setisModalOpen, user, rolesList}
             </View>
             <View className="flex flex-row justify-center items-center gap-4">
                 {/* sauvegarder les changement */}
-                <TouchableOpacity className="bg-lime-500 rounded-lg p-3" onPress={() => updateRoles({email : user.email, roles : selectedRoles, currentRoles : user.roles})}>
+                {isAdminViewer && <TouchableOpacity className="bg-lime-500 rounded-lg p-3" onPress={() => updateRoles({email : user.email, roles : selectedRoles, currentRoles : user.roles})}>
                     <Text className="text-green-800 font-bold">Sauvegarder</Text>
-                </TouchableOpacity>
+                </TouchableOpacity>}
 
                 {/* effacer les changements */}
                 <TouchableOpacity className="bg-red-300 rounded-lg p-3" onPress={() => {

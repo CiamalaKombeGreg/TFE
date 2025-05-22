@@ -3,11 +3,13 @@ import {ActivityIndicator, Button, Image, Pressable, Text, TouchableOpacity, Vie
 import { SafeAreaView } from "react-native-safe-area-context";
 import {Picker} from '@react-native-picker/picker';
 import {useGetRoles} from "%/hooks/useGetRoles";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 import { useGetUsers } from "@/components/hooks/useGetUsers";
 import { UserModal } from "@/components/element/users/userParamModal";
 
 import { UsersListModal } from "@/lib/types";
+import { AuthResponse } from "@/lib/types";
 
 const UsersList = () => {
     const { data : roles, isLoading: isRolesLoading } = useGetRoles();
@@ -16,6 +18,20 @@ const UsersList = () => {
     const [allModal, setAllModal] = useState<UsersListModal[]>([]);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
+    // Authentification user
+    const [userInfo, setUserInfo] = React.useState<AuthResponse | null>(null);
+    const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(false);
+      
+      const getCurrentUser = async () => {
+        const currentUser = GoogleSignin.getCurrentUser() as AuthResponse;
+        setUserInfo(currentUser);
+      };
+    
+      React.useEffect(() => {
+        getCurrentUser();
+      }, [])
+
+      // Refresh current
     const refresh = ({roles, email} : {roles : string[], email : string}) => {
         const initAllModal : UsersListModal[] = []
         for(let element of users){
@@ -37,7 +53,7 @@ const UsersList = () => {
                     <View className="flex flex-row gap-8">
                         {!user.isOpen && <Text className="font-bold">{user?.email}</Text>}
                         {!user.isOpen && <TouchableOpacity className="bg-green-500 rounded-lg p-1" onPress={() => openModal(user)}><Text className="text-white font-bold">Paramètre</Text></TouchableOpacity>}
-                        {user.isOpen && <UserModal refresh={refresh} closeModal={openModal} setisModalOpen={setIsModalOpen} user={user} rolesList={rolesArray} />}
+                        {user.isOpen && <UserModal currentViewer={userInfo?.user.email} isAdminViewer={isSuperAdmin} refresh={refresh} closeModal={openModal} setisModalOpen={setIsModalOpen} user={user} rolesList={rolesArray} />}
                     </View>
                 </View>
             )
@@ -76,11 +92,20 @@ const UsersList = () => {
 
     // Init first modal state
     const initModal = (users: UsersListModal[]) => {
-        setAllModal(users)
+        setAllModal(users);
+        for(let element of users){
+            console.log(element)
+            console.log(userInfo?.user.email)
+            if(element.email === userInfo?.user.email){
+                if(element.roles.includes("SUPERADMIN")){
+                    setIsSuperAdmin(true);
+                }
+            }
+        }
     }
     
 
-    if(isRolesLoading || isUsersLoading) {
+    if(isRolesLoading || isUsersLoading || !userInfo) {
         return (
             <SafeAreaView className="flex flex-col justify-content items-center"><ActivityIndicator /></SafeAreaView>
         )
