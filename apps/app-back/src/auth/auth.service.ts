@@ -36,6 +36,7 @@ export class AuthService {
             data: {
               pseudo: data.nom,
               email: data.email,
+              role: ["DEV"]
             },
           });
           return {
