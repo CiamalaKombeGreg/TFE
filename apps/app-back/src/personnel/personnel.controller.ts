@@ -1,8 +1,10 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Param} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UsePipes, ValidationPipe} from '@nestjs/common';
 import { PersonnelService } from './personnel.service';
+import { Role } from '@prisma/client';
+import { UpdateRolesDto } from './dtos/updateRoles.dto';
 
-@Controller('personnel')
+@Controller('personnelById')
 export class PersonnelController {
   constructor(private personnelService: PersonnelService) {}
 
@@ -12,12 +14,18 @@ export class PersonnelController {
     }
 }
 
-@Controller('personnelClass')
+@Controller('personnel')
 export class PersonnelClassController {
     constructor (private personnelService: PersonnelService) {}
 
     @Get()
         getUserByClass(){
             return this.personnelService.getUsers()
+    }
+
+    @Post('roles')
+    @UsePipes(ValidationPipe)
+    updateUserRoles(@Body() updateUserRoles : UpdateRolesDto){
+        return this.personnelService.updateUserRoles(updateUserRoles)
     }
 }
