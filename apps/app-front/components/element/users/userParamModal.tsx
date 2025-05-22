@@ -91,7 +91,7 @@ export const UserModal = ({currentViewer, isAdminViewer, refresh, closeModal, se
                 {rolesList.map((role) => (
                     <View key={role} className="flex flex-row justify-between">
                         <Text>{role} : </Text>
-                        <Checkbox value={selectedRoles.includes(role)} onValueChange={() => changeRole(role)} />
+                        <Checkbox value={selectedRoles.includes(role)} onValueChange={() => changeRole(role)} disabled={!isAdminViewer}/>
                     </View>
                 ))}
             </View>
