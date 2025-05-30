@@ -36,7 +36,8 @@ const tabs = {
   Calendar: "calendar/Calendar",
   SelfHolidays: "Requests/MyHolidays",
   idHoliday: "Requests/[id]",
-  userList: "users/usersList"
+  userList: "users/usersList",
+  supervisor: "users/Supervisor",
 };
 
 const ValidateAuth = async (data: AuthResponse) => {
@@ -206,6 +207,14 @@ const DrawerLayout = () => {
             headerRight: () => <CustomHeader />,
             drawerLabel: "Organisation",
             title: "Organisation",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.supervisor}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Supervision",
+            title: "Supervision",
           }}
         />
       </Drawer>

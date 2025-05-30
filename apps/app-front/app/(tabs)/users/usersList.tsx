@@ -10,6 +10,7 @@ import { UserModal } from "@/components/element/users/userParamModal";
 
 import { UsersListModal } from "@/lib/types";
 import { AuthResponse } from "@/lib/types";
+import { ScrollView } from "react-native-gesture-handler";
 
 const UsersList = () => {
     const { data : roles, isLoading: isRolesLoading } = useGetRoles();
@@ -36,9 +37,9 @@ const UsersList = () => {
         const initAllModal : UsersListModal[] = []
         for(let element of users){
             if(email === element.email){
-                initAllModal.push({email : element?.email, pseudo: element?.pseudo, roles: roles, isOpen: false})
+                initAllModal.push({email : element?.email, pseudo: element?.pseudo, roles: roles, isOpen: false, supervisor: element.supervisor})
             } else {
-                initAllModal.push({email : element?.email, pseudo: element?.pseudo, roles: element?.roles, isOpen: false})
+                initAllModal.push({email : element?.email, pseudo: element?.pseudo, roles: element?.roles, isOpen: false, supervisor: element.supervisor})
             }
         }
         setAllModal(initAllModal)
@@ -68,7 +69,7 @@ const UsersList = () => {
         } else {
             for(let element of allModal){
                 if(element.email === item.email){
-                    const newState : UsersListModal = {email : item.email, pseudo: item.pseudo, roles: item.roles, isOpen: !item.isOpen}
+                    const newState : UsersListModal = {email : item.email, pseudo: item.pseudo, roles: item.roles, isOpen: !item.isOpen, supervisor: item.supervisor}
                     setAllModal(allModal.map((newItem) => generateNewModal({newItem : newState, currentItem : newItem})))
                 }
             }
@@ -94,8 +95,6 @@ const UsersList = () => {
     const initModal = (users: UsersListModal[]) => {
         setAllModal(users);
         for(let element of users){
-            console.log(element)
-            console.log(userInfo?.user.email)
             if(element.email === userInfo?.user.email){
                 if(element.roles.includes("SUPERADMIN")){
                     setIsSuperAdmin(true);
@@ -115,7 +114,7 @@ const UsersList = () => {
             initModal(users)
         }
         return (
-            <SafeAreaView className="z-10 relative">
+            <ScrollView className="z-10 relative">
                 {/* Title */}
                 <View className="z-10">
                     <Text className="text-3xl p-4">Utilisateurs</Text>
@@ -140,7 +139,7 @@ const UsersList = () => {
                 <View className="fixed inset-0 bg-white/50 flex flex-col items-center justify-center z-50">
                     {allModal.map((user) => getUser({user, rolesArray}))}
                 </View>
-            </SafeAreaView>
+            </ScrollView>
         )
     }
 }

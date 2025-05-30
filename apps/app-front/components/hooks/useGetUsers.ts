@@ -1,3 +1,4 @@
+import Supervisor from "@/app/(tabs)/users/Supervisor";
 import { UsersListModal } from "@/lib/types";
 import {useQuery, UseQueryOptions} from "@tanstack/react-query";
 
@@ -28,7 +29,7 @@ export const useGetUsers = (
         const initAllModal : UsersListModal[] = []
         if(Array.isArray(users)){
             for(let element of users){
-                initAllModal.push({email : element?.email, pseudo: element?.pseudo, roles: element?.role, isOpen: false})
+                initAllModal.push({email : element?.email, pseudo: element?.pseudo, roles: element?.role, isOpen: false, supervisor: element?.supervisor})
             }
         }
         return initAllModal

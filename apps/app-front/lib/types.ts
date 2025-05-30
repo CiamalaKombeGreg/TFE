@@ -34,4 +34,5 @@ export interface UsersListModal {
   roles: string[]
   email: string;
   isOpen: boolean;
+  supervisor: string[];
 }
