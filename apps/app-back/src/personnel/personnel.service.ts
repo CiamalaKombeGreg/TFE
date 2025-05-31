@@ -35,31 +35,14 @@ export class PersonnelService {
     }
 
     // Update supervisor
-    async updateSupervision({supervisorEmails, superviseEmail} : {supervisorEmails : string[], superviseEmail : string}){
-        const superviseId = await this.getIdByEmail(superviseEmail);
-
-        // Array to contain any existing supervision, used later for delete
-        const supervisorIdList : string[] = [];
-
-        if(superviseId?.prsId === undefined){
-            return {status : 404, message : "Supervise wasn't found."}
-        }
-
+    async updateSupervision({supervisorIdList, superviseId} : {supervisorIdList : string[], superviseId : string}){
         // Add every supervision
-        for(const supervisorEmail of supervisorEmails){
-            const supervisorId = await this.getIdByEmail(supervisorEmail);
-
-            if(supervisorId?.prsId === undefined){
-                continue;
-            }
-
-            supervisorIdList.push(supervisorId.prsId)
-
+        for(const supervisorId of supervisorIdList){
             const doesExist = await this.prisma.supervision.findUnique({
                 where : {
                     superviseId_superviseurId : {
-                        superviseId : superviseId?.prsId,
-                        superviseurId : supervisorId?.prsId 
+                        superviseId : superviseId,
+                        superviseurId : supervisorId 
                     }
                 }
             })
@@ -67,8 +50,8 @@ export class PersonnelService {
             if(!doesExist){
                 await this.prisma.supervision.create({
                     data : {
-                        superviseId : superviseId?.prsId,
-                        superviseurId : supervisorId?.prsId
+                        superviseId : superviseId,
+                        superviseurId : supervisorId
                     }
                 })
             }
@@ -77,7 +60,7 @@ export class PersonnelService {
         // Remove inexistant supervision
         const allSupervisionRelated = await this.prisma.supervision.findMany({
             where : {
-                superviseId: superviseId?.prsId
+                superviseId: superviseId
             }
         })
 
@@ -88,7 +71,7 @@ export class PersonnelService {
                 await this.prisma.supervision.delete({
                     where : {
                         superviseId_superviseurId: {
-                            superviseId : superviseId?.prsId,
+                            superviseId : superviseId,
                             superviseurId : element.superviseurId
                         }
                     }

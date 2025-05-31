@@ -29,7 +29,7 @@ export const useGetUsers = (
         const initAllModal : UsersListModal[] = []
         if(Array.isArray(users)){
             for(let element of users){
-                initAllModal.push({email : element?.email, pseudo: element?.pseudo, roles: element?.role, isOpen: false, supervisor: element?.supervisor})
+                initAllModal.push({id : element.prsId ,email : element?.email, pseudo: element?.pseudo, roles: element?.role, isOpen: false, supervisor: element?.supervisor, supervise: element?.supervise})
             }
         }
         return initAllModal

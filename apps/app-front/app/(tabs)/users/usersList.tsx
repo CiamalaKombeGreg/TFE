@@ -37,9 +37,9 @@ const UsersList = () => {
         const initAllModal : UsersListModal[] = []
         for(let element of users){
             if(email === element.email){
-                initAllModal.push({email : element?.email, pseudo: element?.pseudo, roles: roles, isOpen: false, supervisor: element.supervisor})
+                initAllModal.push({id : element.id ,email : element?.email, pseudo: element?.pseudo, roles: roles, isOpen: false, supervisor: element.supervisor, supervise: element.supervise})
             } else {
-                initAllModal.push({email : element?.email, pseudo: element?.pseudo, roles: element?.roles, isOpen: false, supervisor: element.supervisor})
+                initAllModal.push({id : element.id ,email : element?.email, pseudo: element?.pseudo, roles: element?.roles, isOpen: false, supervisor: element.supervisor, supervise: element.supervise})
             }
         }
         setAllModal(initAllModal)
@@ -69,7 +69,7 @@ const UsersList = () => {
         } else {
             for(let element of allModal){
                 if(element.email === item.email){
-                    const newState : UsersListModal = {email : item.email, pseudo: item.pseudo, roles: item.roles, isOpen: !item.isOpen, supervisor: item.supervisor}
+                    const newState : UsersListModal = {id : item.id ,email : item.email, pseudo: item.pseudo, roles: item.roles, isOpen: !item.isOpen, supervisor: item.supervisor, supervise: item.supervise}
                     setAllModal(allModal.map((newItem) => generateNewModal({newItem : newState, currentItem : newItem})))
                 }
             }

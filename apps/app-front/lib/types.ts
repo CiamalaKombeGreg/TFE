@@ -30,9 +30,11 @@ export interface Holiday {
 
 // Modal in usersList
 export interface UsersListModal {
+  id : string;
   pseudo: string;
   roles: string[]
   email: string;
   isOpen: boolean;
-  supervisor: string[];
+  supervisor: {superviseId : string, superviseurId : string}[];
+  supervise: {superviseId : string, superviseurId : string}[];
 }

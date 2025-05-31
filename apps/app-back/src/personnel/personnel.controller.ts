@@ -37,6 +37,6 @@ export class SupervisionController {
     @Post('create')
     @UsePipes(ValidationPipe)
     createSupervision(@Body() updateSupervision : UpdateSupervisionDto){
-        return this.personnelService.updateSupervision({superviseEmail : updateSupervision.superviseEmail, supervisorEmails : updateSupervision.supervisorEmails})
+        return this.personnelService.updateSupervision({superviseId : updateSupervision.superviseId, supervisorIdList : updateSupervision.supervisorIdList})
     }
 }
