@@ -66,8 +66,8 @@ model Personnel {
   role          Role[] // Rôle dans l'entreprise
   notifications String[] // Notifications garder en database sur l'application
   totalConge    AllowedHoliday[] @relation("allowedPersonnel") // Liste des congés restants par types
-  supervisor    Supervision[]    @relation("superviseur") // Liste des gens qui supervise la personne
-  supervise     Supervision[]    @relation("supervise") // Liste des gens que la personne supervise
+  supervisor    Supervision[]    @relation("superviseur") // Liste des gens que la personne supervise
+  supervise     Supervision[]    @relation("supervise") // Liste des gens qui supervise la personne
   conges        Absences[]       @relation("personnel")
 }
 
