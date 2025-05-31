@@ -36,9 +36,6 @@ const Supervisor = () => {
         return currentSupervisor
     }
 
-    // Selected supervisor
-    const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-
     if(isUsersLoading || !userInfo){
         
          return (
