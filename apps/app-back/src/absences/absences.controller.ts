@@ -3,6 +3,7 @@ import { Body, Controller, Delete, Get, Param, Post, UsePipes, ValidationPipe } 
 import { AbsencesService } from "./absences.service";
 import { CreateAbsenceDto } from "./dtos/CreateAbsence.dto";
 import { UpdateAbsenceDto } from "./dtos/UpdateAbsence.dto";
+import { EditAbsenceDto } from "./dtos/EditAbsence.dto";
 
 @Controller('absences')
 export class AbsencesController {
@@ -32,5 +33,10 @@ export class AbsencesController {
     @Post('status')
     updateHolidayById(@Body() updateAbsenceData: UpdateAbsenceDto){
         return this.absencesService.updateAbsenceById({email : updateAbsenceData.email, id : updateAbsenceData.id, comment : updateAbsenceData.comment, status : updateAbsenceData.status})
+    }
+
+    @Post('edit')
+    editHoliday(@Body() editAbsenceData : EditAbsenceDto){
+        return this.absencesService.editAbsence({id : editAbsenceData.id, comment : editAbsenceData.comment, startDate : editAbsenceData.startDate, endDate : editAbsenceData.endDate})
     }
 }

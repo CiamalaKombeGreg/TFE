@@ -42,6 +42,19 @@ export class AbsencesService {
         })
     }
 
+    editAbsence({id, comment, startDate, endDate} : {id : string, comment : string, startDate : string | Date, endDate : string | Date}){
+        return this.prisma.absences.update({
+            where : {
+                absId : id
+            },
+            data : {
+                commentaire : comment,
+                startDate : startDate,
+                endDate : endDate
+            }
+        })
+    }
+
     async updateAbsenceById({email, id, comment, status} : {email : string, id : string, comment : string, status : Status}){
         const findHoliday = await this.getAbsenceById(id);
         if(!findHoliday) throw new HttpException("Holiday was not found", 404);
