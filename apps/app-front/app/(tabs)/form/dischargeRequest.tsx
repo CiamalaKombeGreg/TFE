@@ -17,8 +17,8 @@ import { AuthResponse } from "@/lib/types";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { getIdByEmail } from "@/lib/getIdByEmail";
 
-const newRequest = async (data: { title: string; startDate: Date; endDate: Date; comment: string; type: string; prsId: string }) => {
-  const id = await getIdByEmail(data.prsId);
+const newRequest = async (data: { title: string; startDate: Date; endDate: Date; comment: string; type: string; email: string }) => {
+  const id = await getIdByEmail(data.email);
 
     const requestData = {
       title: data.title,
@@ -103,7 +103,7 @@ const DischargeRequest = () => {
 
     // Envoyer les données du formulaire à votre serveur ici
     if(userInfo !== null){
-      mutation.mutate({ title, startDate, endDate, comment, type, prsId: userInfo.user.email });
+      mutation.mutate({ title, startDate, endDate, comment, type, email: userInfo.user.email });
     }
 
     // Vider les champs après la soumission

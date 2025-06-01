@@ -2,6 +2,7 @@
 import { Body, Controller, Delete, Get, Param, Post, UsePipes, ValidationPipe } from "@nestjs/common";
 import { AbsencesService } from "./absences.service";
 import { CreateAbsenceDto } from "./dtos/CreateAbsence.dto";
+import { UpdateAbsenceDto } from "./dtos/UpdateAbsence.dto";
 
 @Controller('absences')
 export class AbsencesController {
@@ -26,5 +27,10 @@ export class AbsencesController {
     @Delete(':id')
     deleteHolidayById(@Param('id') id: string){
         return this.absencesService.deleteAbsenceById(id)
+    }
+
+    @Post('status')
+    updateHolidayById(@Body() updateAbsenceData: UpdateAbsenceDto){
+        return this.absencesService.updateAbsenceById({id : updateAbsenceData.id, comment : updateAbsenceData.comment, status : updateAbsenceData.status})
     }
 }

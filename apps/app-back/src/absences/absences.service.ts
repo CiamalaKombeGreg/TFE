@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { HttpException, Injectable } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
+import { Prisma, Status } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
@@ -38,6 +38,20 @@ export class AbsencesService {
         return this.prisma.absences.delete({
             where: {
                 absId: id
+            }
+        })
+    }
+
+    async updateAbsenceById({id, comment, status} : {id : string, comment : string, status : Status}){
+        const findHoliday = await this.getAbsenceById(id);
+        if(!findHoliday) throw new HttpException("Holiday was not found", 404);
+        console.log(comment)
+        return this.prisma.absences.update({
+            where: {
+                absId: id
+            },
+            data : {
+                status : status
             }
         })
     }
