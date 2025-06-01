@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { Text, SafeAreaView, View, TouchableOpacity, TextInput,  StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { Text, SafeAreaView, View, TouchableOpacity, TextInput,  StyleSheet, Alert, ActivityIndicator, Button, Platform } from 'react-native';
 import { useGetHolidaysById } from '@/components/hooks/useGetHolidaysById';
 import { useEffect, useMemo, useState } from 'react';
 import { useDeleteHoliday } from '@/components/hooks/useDeleteHoliday';
@@ -12,6 +12,8 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { getTypeById } from '@/lib/getTypeById';
 import { AuthResponse } from '@/lib/types';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useEditRequest } from '@/components/hooks/useEditRequest';
 
 interface FormData {
     comment: string;
@@ -37,6 +39,7 @@ const HolidayItem = () => {
     const {data} = useGetHolidaysById(id) as any;
     const deleteHoliday = useDeleteHoliday(id);
     const updateHoliday = useRespondRequest(id);
+    const editHoliday = useEditRequest(id);
     const router = useRouter()
 
     // Modals hooks
@@ -105,7 +108,48 @@ const HolidayItem = () => {
         }
     }
 
-    const EditHoliday = () => {}
+    // Edit holiday
+    const [startDate, setStartDate] = useState<Date>(new Date());
+    const [endDate, setEndDate] = useState<Date>(new Date());
+    const [comment, setComment] = useState<string>("");
+    const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+    const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+    
+    const onChangeStartDate = (event: any, selectedDate: Date | undefined) => {
+    const currentDate = selectedDate || startDate;
+    setShowStartDatePicker(Platform.OS === "ios");
+    setStartDate(currentDate);
+    };
+
+    const onChangeEndDate = (event: any, selectedDate: Date | undefined) => {
+    const currentDate = selectedDate || endDate;
+    setShowEndDatePicker(Platform.OS === "ios");
+    setEndDate(currentDate);
+    };
+
+    const EditHoliday = async () => {
+        if(comment.length <= 0){
+            emptyComment();
+        } else {
+            try{
+                await editHoliday.mutateAsync({
+                    holidayId: id,
+                    comment: comment,
+                    startDate: startDate,
+                    endDate: endDate
+                })
+            }catch (e){
+                console.log(e)
+            }finally{
+                setComment('');
+                setStartDate(new Date())
+                setEndDate(new Date())
+                setOpenEdit(false);
+                setConfirm(false);
+                router.push({pathname: '/Requests/MyHolidays'});
+            }
+        }
+    }
 
     // Get type of holiday
     const initInfo = async () => {
@@ -138,9 +182,9 @@ const HolidayItem = () => {
                 <Text className={('text-gray-600')}>Type : {type ?? "Chargement"}</Text>
                 <Text className={('text-gray-600')}>Statut : {data?.status ?? "Chargement"}</Text>
                 <Text className={('text-gray-600')}>Commentaire : {data?.commentaire ?? "Chargement"}</Text>
-                <Text className={('text-gray-600')}>Date de début : {data?.startDate ?? "Chargement"}</Text>
-                <Text className={('text-gray-600')}>Date de fin : {data?.endDate ?? "Chargement"}</Text>
-                <Text className={('text-gray-600')}>Mise à jour le : {data?.updateAt ?? "Chargement"}</Text>
+                <Text className={('text-gray-600')}>Date de début : {new Date(data?.startDate).toLocaleDateString() ?? "Chargement"}</Text>
+                <Text className={('text-gray-600')}>Date de fin : {new Date(data?.endDate).toLocaleDateString() ?? "Chargement"}</Text>
+                <Text className={('text-gray-600')}>Mise à jour le : {new Date(data?.updateAt).toLocaleDateString() ?? "Chargement"} vers {new Date(data?.updateAt).toLocaleTimeString()}</Text>
             </View>
             <View className={('flex-row justify-around p-4')}>
 
@@ -202,9 +246,68 @@ const HolidayItem = () => {
                 {openEdit &&
                     <View className='absolute z-10'>
                         <View className={'flex items-center justify-center bg-white w-full p-4 rounded-xl'}>
-                            <Text>Editer</Text>
+                        <Text className='text-3xl font-bold m-4'>Editer</Text>
+                        <View className="flex flex-row gap-4">
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Date de début : {startDate.toLocaleDateString()}</Text>
+                                <Button title="Choisir une date" onPress={() => setShowStartDatePicker(true)} />
+                                {showStartDatePicker && (
+                                    <DateTimePicker
+                                    value={startDate}
+                                    mode="date"
+                                    is24Hour={true}
+                                    onChange={onChangeStartDate}
+                                    style={styles.datePicker} // Style pour le DateTimePicker
+                                    />
+                                )}
+                            </View>
+
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Date de fin : {endDate.toLocaleDateString()}</Text>
+                                <Button title="Choisir une date" onPress={() => setShowEndDatePicker(true)} />
+                                {showEndDatePicker && (
+                                    <DateTimePicker
+                                    value={endDate}
+                                    mode="date"
+                                    is24Hour={true}
+                                    onChange={onChangeEndDate}
+                                    style={styles.datePicker} // Style pour le DateTimePicker
+                                    />
+                                )}
+                            </View>
+                        </View>
+
+                        <View style={styles.inputContainer}>
+                            <Text className='text-gray-700 mb-1'>Commentaire:</Text>
+                            <TextInput
+                                className='border border-gray-300 rounded px-3 py-2 mb-4 w-[18em] h-[4em]'
+                                value={comment}
+                                onChangeText={(text) => setComment(text)}
+                                multiline
+                                numberOfLines={8}
+                            />
+                        </View>
+                        {!confirm ?
                             <TouchableOpacity
-                                onPress={() => {setOpenEdit(false)}}
+                            onPress={() => setConfirm(true)}
+                            className='bg-blue-500 text-white font-bold my-4 py-2 px-4 rounded'
+                            >
+                                <Text className='text-white'>Soumettre</Text>
+                            </TouchableOpacity>
+                            :
+                            <TouchableOpacity
+                            onPress={EditHoliday}
+                            className='bg-green-500 text-lime font-bold my-4 py-2 px-4 rounded'
+                            >
+                                <Text className='text-white'>Etes-vous sûr ?</Text>
+                            </TouchableOpacity>
+                            }
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setOpenEdit(false);
+                                    setConfirm(false);
+                                }}
+                                className='flex flex-col items-center justify-center bg-blue-100 m-4 p-2 rounded-lg w-[8em] h-[4em]'
                             >
                                 <Text>Fermer</Text>
                             </TouchableOpacity>
@@ -268,7 +371,10 @@ const HolidayItem = () => {
                             </TouchableOpacity>
                             }
                             <TouchableOpacity
-                                onPress={() => {setOpenStatus(false)}}
+                                onPress={() => {
+                                    setOpenStatus(false);
+                                    setConfirm(false);
+                                }}
                                 className='flex flex-col items-center justify-center bg-blue-100 m-4 p-2 rounded-lg w-[8em] h-[4em]'
                             >
                                 <Text>Fermer</Text>
@@ -286,6 +392,23 @@ const styles = StyleSheet.create({
       borderWidth: 1,
       boxShadow: "6px 6px 2px 1px rgba(0, 0, 255, 0.1)",
     },
+    inputContainer: {
+        marginBottom: 15,
+      },
+      label: {
+        fontSize: 16,
+        marginBottom: 5,
+      },
+      input: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        padding: 10,
+        borderRadius: 5,
+        fontSize: 16, // Augmenter la taille de la police du champ de texte
+      },
+      datePicker: {
+        width: '100%', // Ajuster la largeur du DateTimePicker
+      },
   });
 
 export default HolidayItem;
