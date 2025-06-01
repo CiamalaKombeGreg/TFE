@@ -5,6 +5,10 @@ import { IsEnum, IsNotEmpty, IsString } from "class-validator";
 export class UpdateAbsenceDto {
     @IsString()
     @IsNotEmpty()
+    email: string;
+
+    @IsString()
+    @IsNotEmpty()
     id: string;
 
     @IsString()

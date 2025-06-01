@@ -1,7 +1,7 @@
 import { useLocalSearchParams } from 'expo-router';
 import { Text, SafeAreaView, View, TouchableOpacity, TextInput,  StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useGetHolidaysById } from '@/components/hooks/useGetHolidaysById';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useDeleteHoliday } from '@/components/hooks/useDeleteHoliday';
 import { useRouter } from 'expo-router';
 import classNames from 'classnames';
@@ -10,6 +10,8 @@ import RadioGroup from 'react-native-radio-buttons-group';
 import { useRespondRequest } from '@/components/hooks/useRespondRequest';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { getTypeById } from '@/lib/getTypeById';
+import { AuthResponse } from '@/lib/types';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 interface FormData {
     comment: string;
@@ -17,6 +19,19 @@ interface FormData {
 }
 
 const HolidayItem = () => {
+    // Utilisateur
+    const [userInfo, setUserInfo] = useState<AuthResponse | null>(null);
+        
+    const getCurrentUser = async () => {
+        const currentUser = GoogleSignin.getCurrentUser() as AuthResponse;
+        setUserInfo(currentUser);
+    };
+    
+    useEffect(() => {
+        getCurrentUser();
+    }, [])
+    
+
     // Init constants and hooks
     const {id} = useLocalSearchParams<{ id: string }>();
     const {data} = useGetHolidaysById(id) as any;
@@ -62,7 +77,9 @@ const HolidayItem = () => {
             emptyComment();
         } else {
             try{
-                await updateHoliday.mutateAsync({holidayId : id, comment : formData.comment, status : formData.status});
+                if(userInfo?.user.email !== undefined){
+                    await updateHoliday.mutateAsync({email: userInfo?.user.email, holidayId : id, comment : formData.comment, status : formData.status});
+                }
             }catch (e){
                 console.log(e)
             }finally{

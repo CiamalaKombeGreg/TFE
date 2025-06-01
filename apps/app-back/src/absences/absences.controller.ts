@@ -31,6 +31,6 @@ export class AbsencesController {
 
     @Post('status')
     updateHolidayById(@Body() updateAbsenceData: UpdateAbsenceDto){
-        return this.absencesService.updateAbsenceById({id : updateAbsenceData.id, comment : updateAbsenceData.comment, status : updateAbsenceData.status})
+        return this.absencesService.updateAbsenceById({email : updateAbsenceData.email, id : updateAbsenceData.id, comment : updateAbsenceData.comment, status : updateAbsenceData.status})
     }
 }
