@@ -42,11 +42,12 @@ export class AbsencesService {
         })
     }
 
-    async updateAbsenceById({id, comment, status} : {id : string, comment : string, status : Status}){
+    async updateAbsenceById({email, id, comment, status} : {email : string, id : string, comment : string, status : Status}){
         const findHoliday = await this.getAbsenceById(id);
         if(!findHoliday) throw new HttpException("Holiday was not found", 404);
-        console.log(comment)
-        return this.prisma.absences.update({
+
+        // Update holiday
+        await this.prisma.absences.update({
             where: {
                 absId: id
             },
@@ -54,5 +55,34 @@ export class AbsencesService {
                 status : status
             }
         })
+
+        // Fetch the email of the recipient
+        const user = await this.prisma.absences.findUnique({
+            where : {
+                absId : id
+            },
+            select : {
+                title : true,
+                personnel : true
+            }
+        })
+
+        if(!user?.personnel && !user?.title) throw new HttpException("No receiver found.", 404);
+        const receiver = user.personnel.email;
+        const titre = user.title
+
+        const subject = () => {
+            if(status === "ACCEPTER"){
+                return "Votre demande de congé a été accepté : "+titre
+            }
+
+            if(status === "REFUSER"){
+                return "Votre demande de congé a été refusé : "+titre
+            }
+
+            return "Votre demande de congé a été annulé : "+titre
+        }
+
+        return {recipient : receiver, sender : email, subject : subject(), html : comment};
     }
 }
