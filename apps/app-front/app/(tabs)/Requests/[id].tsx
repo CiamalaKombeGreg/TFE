@@ -62,6 +62,12 @@ const HolidayItem = () => {
         ]
     );
 
+    const wrongStartDate = () =>
+        Alert.alert('La date est mauvaise', 'Votre date de retour est ultérieur à votre date de commencement.', [
+            {text: "J'ai comrpis", onPress: () => setConfirm(false)},
+        ]
+    );
+
     const radioButtons = useMemo(() => ([
         {
             id: 'ACCEPTER',
@@ -130,6 +136,8 @@ const HolidayItem = () => {
     const EditHoliday = async () => {
         if(comment.length <= 0){
             emptyComment();
+        } else if (startDate > endDate){
+            wrongStartDate();
         } else {
             try{
                 await editHoliday.mutateAsync({
@@ -207,12 +215,21 @@ const HolidayItem = () => {
                 </TouchableOpacity>
 
                 {/* Review modal */}
-                {data?.status === 'ANALYSE' || data?.status === 'ANNULER' && <TouchableOpacity
+                {data?.status === 'ANALYSE' && <TouchableOpacity
                     disabled={openDelete || openEdit || openStatus}
                     className={'bg-green-500 hover:bg-green-700 py-2 px-4 rounded'}
                     onPress={() => setOpenStatus(true)}
                 >
                     <Text className='text-white font-bold'>Répondre</Text>
+                </TouchableOpacity>}
+
+                {/* Annuler modal */}
+                {data?.status === 'ANNULER' && <TouchableOpacity
+                    disabled={openDelete || openEdit || openStatus}
+                    className={'bg-green-500 hover:bg-green-700 py-2 px-4 rounded'}
+                    onPress={() => setOpenStatus(true)}
+                >
+                    <Text className='text-white font-bold'>Activer</Text>
                 </TouchableOpacity>}
 
                 {/* Cancel modal */}
