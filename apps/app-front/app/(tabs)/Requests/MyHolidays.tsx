@@ -2,22 +2,14 @@ import MHCard from "@/components/element/MyHolidays/MHCard";
 import { useGetHolidays } from "@/components/hooks/useGetHolidays";
 import { ActivityIndicator, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { AuthResponse, Holiday } from "@/lib/types";
+import { AuthResponse, Holiday, UserRelatedAbsenceProps } from "@/lib/types";
 import React, { useState } from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import { Picker } from "@react-native-picker/picker";
-import { useGetUsers } from "@/components/hooks/useGetUsers";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { useGetRelatedHolidays } from "@/components/hooks/useGetRelatedHolidays";
 
 const MyHolidays = () => {
-    // Fetched data
-    const { data : users, isLoading: isUsersLoading  } = useGetUsers();
-    const [list, setList] = useState<string | undefined>(); // Selected member
-    const { data : holidays } = useGetHolidays()
-
-    // Status hook
-    const [status, setStatus] = useState<"ALL" | "ACCEPTER" | "REFUSER" | "ANALYSE" | "ANNULER">("ALL");
-
     // Authentification user
     const [userInfo, setUserInfo] = useState<AuthResponse | null>(null);
 
@@ -30,9 +22,16 @@ const MyHolidays = () => {
         getCurrentUser();
     }, [])
 
+    // Fetched data
+    const { data : users, isLoading: isUsersLoading  } = useGetRelatedHolidays(userInfo?.user.email || "");
+    const [list, setList] = useState<string | undefined>(); // Selected member
+
+    // Status hook
+    const [status, setStatus] = useState<"ALL" | "ACCEPTER" | "REFUSER" | "ANALYSE" | "ANNULER">("ALL");
+
     // Sort on start date
-    const orderHoliday = (firstDate : string, secondDate : string) => {
-        if(new Date(firstDate) >= new Date(secondDate)){
+    const orderHoliday = (firstDate : Date, secondDate : Date) => {
+        if(firstDate >= secondDate){
             return 1
         }else{
             return -1
@@ -82,12 +81,14 @@ const MyHolidays = () => {
     
                 {/* Tableau */}
                 <ScrollView>
-                    <View className="flex flex-col items-stretch justify-start h-[80%] w-[90%] m-2 gap-2">
-                        {typeof holidays === "object" && Array.isArray(holidays) && holidays?.sort((element_1 : Holiday, element_2 : Holiday) => orderHoliday(element_1.startDate, element_2.startDate))
-                        .map((element: Holiday) =>
+                    {users.map((user) => 
+                        list === user.pseudo && <View key={user.prsId} className="flex flex-col items-stretch justify-start h-[80%] w-[90%] m-2 gap-2">
+                        {user.conges.sort((element_1, element_2) => orderHoliday(element_1.startDate, element_2.startDate))
+                        .map((element) =>
                                (element.status === status || status === "ALL") && <MHCard key={element.absId} id={element.absId} title={element.title} status={element.status} beginDate={new Date(element.startDate)} endDate={new Date(element.endDate)} />
                             )}
-                    </View>
+                        </View>
+                    )}
                 </ScrollView>
             </SafeAreaView>
         )

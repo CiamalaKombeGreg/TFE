@@ -38,3 +38,22 @@ export interface UsersListModal {
   supervisor: {superviseId : string, superviseurId : string}[];
   supervise: {superviseId : string, superviseurId : string}[];
 }
+
+// Modal in users and their absences fetch
+export interface UserRelatedAbsenceProps {
+  prsId: string;
+  pseudo: string;
+  email: string;
+  conges: {
+      absId: string;
+      title: string;
+      typeId: string;
+      startDate: Date;
+      endDate: Date;
+      createAt: Date;
+      updateAt: Date;
+      status: string;
+      commentaire: string;
+      personnelId: string;
+  }[];
+}

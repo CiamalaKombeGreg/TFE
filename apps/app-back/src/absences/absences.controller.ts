@@ -12,7 +12,7 @@ export class AbsencesController {
     @Post()
     @UsePipes(ValidationPipe)
     createAbsence(@Body() createAbsenceData: CreateAbsenceDto) {
-        return this.absencesService.createAbsence(createAbsenceData)
+        return this.absencesService.createAbsence(createAbsenceData);
     }
 
     @Get()
@@ -25,18 +25,23 @@ export class AbsencesController {
         return this.absencesService.getAbsenceById(id);
     }
 
+    @Get('related/:id')
+    getRelatedAbsenceByEmail(@Param('id') id: string){
+        return this.absencesService.getUserAbsences(id);
+    }
+
     @Delete(':id')
     deleteHolidayById(@Param('id') id: string){
-        return this.absencesService.deleteAbsenceById(id)
+        return this.absencesService.deleteAbsenceById(id);
     }
 
     @Post('status')
     updateHolidayById(@Body() updateAbsenceData: UpdateAbsenceDto){
-        return this.absencesService.updateAbsenceById({email : updateAbsenceData.email, id : updateAbsenceData.id, comment : updateAbsenceData.comment, status : updateAbsenceData.status})
+        return this.absencesService.updateAbsenceById({email : updateAbsenceData.email, id : updateAbsenceData.id, comment : updateAbsenceData.comment, status : updateAbsenceData.status});
     }
 
     @Post('edit')
     editHoliday(@Body() editAbsenceData : EditAbsenceDto){
-        return this.absencesService.editAbsence({id : editAbsenceData.id, comment : editAbsenceData.comment, startDate : editAbsenceData.startDate, endDate : editAbsenceData.endDate})
+        return this.absencesService.editAbsence({id : editAbsenceData.id, comment : editAbsenceData.comment, startDate : editAbsenceData.startDate, endDate : editAbsenceData.endDate});
     }
 }
