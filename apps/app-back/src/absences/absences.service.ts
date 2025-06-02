@@ -14,10 +14,69 @@ export class AbsencesService {
             },
         });
         if(foundId){
-            return this.prisma.absences.create({ data })
+            await this.prisma.absences.create({ data })
         }else{
-            return {error: "Le type n'existe pas"}
+            return {recipients: [], sender: "", title: "", error: true}
         }
+
+        // fetch the user who send it
+        const user = await this.prisma.personnel.findUnique({
+            where : {
+                prsId : data.personnelId
+            },
+            select: {
+                email : true,
+                supervise : true,
+            }
+        })
+
+
+        // We only add id of supervisor
+        const emails: string[] = []
+        if(user?.supervise === undefined || user.supervise.length <= 0){
+            // If undefined or no supervise, take superadmins emails
+            const admins = await this.prisma.personnel.findMany({
+                where : {
+                    role : {
+                        has : "SUPERADMIN"
+                    }
+                },
+                select: {
+                    email : true
+                }
+            });
+
+            for(const admin of admins){
+                emails.push(admin.email);
+            }
+        }else{
+            // Take supervisors email if there are one or many
+            const ids: string[] = [];
+            for(const supervision of user.supervise){
+                ids.push(supervision.superviseurId);
+            }
+            
+            const rhs = await this.prisma.personnel.findMany({
+                where : {
+                    prsId : {
+                        in : ids
+                    }
+                },
+                select : {
+                    email : true
+                }
+            })
+
+            for(const rh of rhs){
+                emails.push(rh.email);
+            }
+        }
+
+        if(user?.email === undefined){
+            return {recipients: [], sender: "", title: "", error: true};
+        }
+
+        return {recipients : emails, sender: user?.email, title: data.title, error: false};
     }
 
     getAbsences() {
@@ -160,14 +219,14 @@ export class AbsencesService {
 
         const subject = () => {
             if(status === "ACCEPTER"){
-                return "Votre demande de congé a été accepté : "+titre
+                return "Votre demande de congé a été accepté par "+email+" : "+titre
             }
 
             if(status === "REFUSER"){
-                return "Votre demande de congé a été refusé : "+titre
+                return "Votre demande de congé a été refusé par "+email+" : "+titre
             }
 
-            return "Votre demande de congé a été annulé : "+titre
+            return "Votre demande de congé a été annulé par "+email+" : "+titre
         }
 
         return {recipient : receiver, sender : email, subject : subject(), html : comment};
