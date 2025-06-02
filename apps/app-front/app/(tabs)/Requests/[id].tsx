@@ -15,6 +15,7 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useEditRequest } from '@/components/hooks/useEditRequest';
 import { getFileByKey } from '@/lib/getFile';
+import { getAdmin } from '@/lib/getAdmin';
 
 interface FormData {
     comment: string;
@@ -52,7 +53,7 @@ const HolidayItem = () => {
 
     // Others hooks
     const [type, setType] = useState<string>("");
-
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
     // Review
     const [formData, setFormData] = useState<FormData>({ comment: '', status: 'ACCEPTER' });
     const [confirm, setConfirm] = useState<boolean>(false);
@@ -170,6 +171,10 @@ const HolidayItem = () => {
     const initInfo = async () => {
         const type = await getTypeById(data?.typeId);
         setType(type);
+        if(userInfo?.user.email !== undefined){
+            const data = await getAdmin(userInfo?.user.email);
+            setIsAdmin(data.isAdmin);
+        }
     }
 
     // Download file (if it has one)
@@ -224,13 +229,13 @@ const HolidayItem = () => {
                 </TouchableOpacity>
 
                 {/* Delete modal */}
-                <TouchableOpacity
+                {isAdmin && <TouchableOpacity
                     disabled={openDelete || openEdit || openStatus}
                     className={'bg-red-500 hover:bg-red-700 py-2 px-4 rounded'}
                     onPress={() => setOpenDelete(true)}
                 >
                     <Text className='text-white font-bold'>Effacer</Text>
-                </TouchableOpacity>
+                </TouchableOpacity>}
 
                 {/* Review modal */}
                 {data?.status === 'ANALYSE' && <TouchableOpacity

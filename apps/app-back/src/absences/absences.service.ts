@@ -100,6 +100,7 @@ export class AbsencesService {
                 prsId : true,
                 pseudo : true,
                 email : true,
+                role : true,
                 conges : true
             }
         });
@@ -115,6 +116,34 @@ export class AbsencesService {
     }
 
     async getUserSuperviseAbsences(email : string){
+        // Very if superadmin
+        const isSuperAdmin = await this.prisma.personnel.findUnique({
+            where : {
+                email,
+                role : {
+                    has: "SUPERADMIN"
+                }
+            },
+        })
+
+        if(isSuperAdmin){
+            const users = await this.prisma.personnel.findMany({
+                where : {
+                    email : {
+                        not : email
+                    }
+                },
+                select : {
+                    prsId : true,
+                    pseudo : true,
+                    email : true,
+                    role : true,
+                    conges : true
+                }
+            });
+            return users;
+        }
+
         const supervisions = await this.prisma.personnel.findUnique({
             where : {
                 email
@@ -128,6 +157,7 @@ export class AbsencesService {
             prsId: string;
             pseudo: string;
             email: string;
+            role: string[];
             conges: {
                 absId: string;
                 title: string;
@@ -152,6 +182,7 @@ export class AbsencesService {
                         prsId : true,
                         pseudo : true,
                         email : true,
+                        role: true,
                         conges : true
                     }
                 })

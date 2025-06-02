@@ -30,7 +30,7 @@ export const useGetRelatedHolidays = (
       const initAllModal : UserRelatedAbsenceProps[] = []
       if(Array.isArray(users)){
           for(let element of users){
-              initAllModal.push({prsId : element.prsId, pseudo : element.pseudo, email : element.email, conges : element.conges})
+              initAllModal.push({prsId : element.prsId, pseudo : element.pseudo, email : element.email, conges : element.conges, roles: element.roles})
           }
       }
       return initAllModal

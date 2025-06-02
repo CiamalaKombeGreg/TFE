@@ -43,7 +43,7 @@ const MyHolidays = () => {
                     <SafeAreaView className="flex flex-col justify-content items-center"><ActivityIndicator /></SafeAreaView>
                 )
     }else if(list === undefined){
-        setList(users[0].pseudo)
+        setList(users[0].pseudo);
     }else{
         return(
             <SafeAreaView className="flex flex-col items-center justify-center bg-gray-100 h-full w-full">
