@@ -37,4 +37,6 @@ export class CreateAbsenceDto {
     @IsString()
     @IsNotEmpty()
     personnelId: string;
+
+    fileKey: string | null;
 }

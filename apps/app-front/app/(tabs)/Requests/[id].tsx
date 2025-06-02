@@ -14,6 +14,8 @@ import { AuthResponse } from '@/lib/types';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useEditRequest } from '@/components/hooks/useEditRequest';
+import { getFileByKey } from '@/lib/getFile';
+import { getAdmin } from '@/lib/getAdmin';
 
 interface FormData {
     comment: string;
@@ -51,7 +53,7 @@ const HolidayItem = () => {
 
     // Others hooks
     const [type, setType] = useState<string>("");
-
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
     // Review
     const [formData, setFormData] = useState<FormData>({ comment: '', status: 'ACCEPTER' });
     const [confirm, setConfirm] = useState<boolean>(false);
@@ -64,6 +66,12 @@ const HolidayItem = () => {
 
     const wrongStartDate = () =>
         Alert.alert('La date est mauvaise', 'Votre date de retour est ultérieur à votre date de commencement.', [
+            {text: "J'ai comrpis", onPress: () => setConfirm(false)},
+        ]
+    );
+
+    const fileNotFound = () =>
+        Alert.alert('Fichier non trouvé', 'Une erreur est survenue lors de la redirection, veuillez contactez un administrateur.', [
             {text: "J'ai comrpis", onPress: () => setConfirm(false)},
         ]
     );
@@ -163,6 +171,20 @@ const HolidayItem = () => {
     const initInfo = async () => {
         const type = await getTypeById(data?.typeId);
         setType(type);
+        if(userInfo?.user.email !== undefined){
+            const data = await getAdmin(userInfo?.user.email);
+            setIsAdmin(data.isAdmin);
+        }
+    }
+
+    // Download file (if it has one)
+    const downloadFile = async () => {
+        const url = await getFileByKey(data.fileKey);
+        if(url === "ERROR"){
+            fileNotFound();
+        } else {
+            router.push({pathname: url});
+        }
     }
 
     // Classnames effects
@@ -193,6 +215,7 @@ const HolidayItem = () => {
                 <Text className={('text-gray-600')}>Date de début : {new Date(data?.startDate).toLocaleDateString() ?? "Chargement"}</Text>
                 <Text className={('text-gray-600')}>Date de fin : {new Date(data?.endDate).toLocaleDateString() ?? "Chargement"}</Text>
                 <Text className={('text-gray-600')}>Mise à jour le : {new Date(data?.updateAt).toLocaleDateString() ?? "Chargement"} vers {new Date(data?.updateAt).toLocaleTimeString()}</Text>
+                {data?.fileKey && <TouchableOpacity onPress={downloadFile} className="text-gray-600 hover:text-blue-600"><Text>Télécharger la pièce jointe</Text></TouchableOpacity>}
             </View>
             <View className={('flex-row justify-around p-4')}>
 
@@ -206,13 +229,13 @@ const HolidayItem = () => {
                 </TouchableOpacity>
 
                 {/* Delete modal */}
-                <TouchableOpacity
+                {isAdmin && <TouchableOpacity
                     disabled={openDelete || openEdit || openStatus}
                     className={'bg-red-500 hover:bg-red-700 py-2 px-4 rounded'}
                     onPress={() => setOpenDelete(true)}
                 >
                     <Text className='text-white font-bold'>Effacer</Text>
-                </TouchableOpacity>
+                </TouchableOpacity>}
 
                 {/* Review modal */}
                 {data?.status === 'ANALYSE' && <TouchableOpacity

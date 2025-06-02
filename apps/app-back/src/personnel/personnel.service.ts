@@ -19,6 +19,24 @@ export class PersonnelService {
         });
     }
 
+    // Verify if admin
+    async getAdmin(email: string){
+        const admin = await this.prisma.personnel.findUnique({
+            where : {
+                email,
+                role : {
+                    has : "SUPERADMIN"
+                }
+            },
+        })
+
+        if(admin){
+            return { status : 200, isAdmin : true };
+        }else{
+            return { status : 200, isAdmin : false };
+        }
+    }
+
     // Return every users
     getUsers(){
         return this.prisma.personnel.findMany({

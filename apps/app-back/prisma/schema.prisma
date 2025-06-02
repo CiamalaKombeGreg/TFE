@@ -96,6 +96,7 @@ model Absences {
   commentaire String
   personnel   Personnel @relation("personnel", fields: [personnelId], references: [prsId])
   personnelId String
+  fileKey     String?
 }
 
 //-------------------------------------------------------------------------------//

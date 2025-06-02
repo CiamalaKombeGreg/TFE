@@ -28,6 +28,11 @@ export class PersonnelClassController {
     updateUserRoles(@Body() updateUserRoles : UpdateRolesDto){
         return this.personnelService.updateUserRoles(updateUserRoles)
     }
+
+    @Get('admin/:id')
+    getAdminByEmail(@Param('id') id: string){
+        return this.personnelService.getAdmin(id);
+    }
 }
 
 @Controller('supervision')

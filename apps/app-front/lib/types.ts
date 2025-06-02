@@ -44,6 +44,7 @@ export interface UserRelatedAbsenceProps {
   prsId: string;
   pseudo: string;
   email: string;
+  roles: string[];
   conges: {
       absId: string;
       title: string;
