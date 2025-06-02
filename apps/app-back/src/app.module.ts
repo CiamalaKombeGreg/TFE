@@ -6,6 +6,7 @@ import { PersonnelModule } from './personnel/personnel.module';
 import { EnumsModule } from './enums/enums.module';
 import { EmailModule } from './email/email.module';
 import { ConfigModule } from '@nestjs/config';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ConfigModule } from '@nestjs/config';
     PersonnelModule,
     EnumsModule,
     EmailModule,
+    UploadModule,
   ],
   controllers: [],
   providers: [],

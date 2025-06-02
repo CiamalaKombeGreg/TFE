@@ -14,6 +14,7 @@ import { AuthResponse } from '@/lib/types';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useEditRequest } from '@/components/hooks/useEditRequest';
+import { getFileByKey } from '@/lib/getFile';
 
 interface FormData {
     comment: string;
@@ -64,6 +65,12 @@ const HolidayItem = () => {
 
     const wrongStartDate = () =>
         Alert.alert('La date est mauvaise', 'Votre date de retour est ultérieur à votre date de commencement.', [
+            {text: "J'ai comrpis", onPress: () => setConfirm(false)},
+        ]
+    );
+
+    const fileNotFound = () =>
+        Alert.alert('Fichier non trouvé', 'Une erreur est survenue lors de la redirection, veuillez contactez un administrateur.', [
             {text: "J'ai comrpis", onPress: () => setConfirm(false)},
         ]
     );
@@ -165,6 +172,16 @@ const HolidayItem = () => {
         setType(type);
     }
 
+    // Download file (if it has one)
+    const downloadFile = async () => {
+        const url = await getFileByKey(data.fileKey);
+        if(url === "ERROR"){
+            fileNotFound();
+        } else {
+            router.push({pathname: url});
+        }
+    }
+
     // Classnames effects
     const pageClass = classNames({
         "p-4 h-[100%] w-[100%]" : true,
@@ -193,6 +210,7 @@ const HolidayItem = () => {
                 <Text className={('text-gray-600')}>Date de début : {new Date(data?.startDate).toLocaleDateString() ?? "Chargement"}</Text>
                 <Text className={('text-gray-600')}>Date de fin : {new Date(data?.endDate).toLocaleDateString() ?? "Chargement"}</Text>
                 <Text className={('text-gray-600')}>Mise à jour le : {new Date(data?.updateAt).toLocaleDateString() ?? "Chargement"} vers {new Date(data?.updateAt).toLocaleTimeString()}</Text>
+                {data?.fileKey && <TouchableOpacity onPress={downloadFile} className="text-gray-600 hover:text-blue-600"><Text>Télécharger la pièce jointe</Text></TouchableOpacity>}
             </View>
             <View className={('flex-row justify-around p-4')}>
 
