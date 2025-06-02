@@ -1,8 +1,13 @@
 import {useQuery, UseQueryOptions} from "@tanstack/react-query";
-import { FormRequestProps } from "$/packages/types/formRequest"
 
 export const useAddRequest = (
-  data: FormRequestProps,
+  data: {
+    title: string;
+    typeId: string;
+    startDate: Date;
+    endDate: Date;
+    commentaire: string; 
+  },
   queryParams?: Omit<UseQueryOptions, "queryKey" | "queryFn">
 ) => {
   const query = useQuery({

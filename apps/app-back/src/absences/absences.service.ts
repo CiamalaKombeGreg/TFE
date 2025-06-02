@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { HttpException, Injectable } from "@nestjs/common";
-import { Prisma, Status } from "@prisma/client";
+import { $Enums, Prisma, Status } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
@@ -30,6 +30,80 @@ export class AbsencesService {
                 absId: id
             },
         });
+    }
+
+    async getUserAbsences(email : string){
+        const user = await this.prisma.personnel.findUnique({
+            where : {
+                email
+            },
+            select : {
+                prsId : true,
+                pseudo : true,
+                email : true,
+                conges : true
+            }
+        });
+
+        if(user === null) throw new HttpException("Holiday was not found", 404);
+
+
+        const supervises = await this.getUserSuperviseAbsences(email);
+
+        supervises.push(user);
+
+        return supervises;
+    }
+
+    async getUserSuperviseAbsences(email : string){
+        const supervisions = await this.prisma.personnel.findUnique({
+            where : {
+                email
+            },
+            select : {
+                supervisor : true
+            }
+        });
+
+        const supervises : {
+            prsId: string;
+            pseudo: string;
+            email: string;
+            conges: {
+                absId: string;
+                title: string;
+                typeId: string;
+                startDate: Date;
+                endDate: Date;
+                createAt: Date;
+                updateAt: Date;
+                status: $Enums.Status;
+                commentaire: string;
+                personnelId: string;
+            }[];
+        }[] = [];
+        
+        if(supervisions?.supervisor !== undefined && supervisions.supervisor.length > 0){
+            for(const supervision of supervisions.supervisor){
+                const conges = await this.prisma.personnel.findUnique({
+                    where : {
+                        prsId : supervision.superviseId
+                    },
+                    select : {
+                        prsId : true,
+                        pseudo : true,
+                        email : true,
+                        conges : true
+                    }
+                })
+
+                if(conges !== null){
+                    supervises.push(conges);
+                }
+            }
+        }
+
+        return supervises;
     }
 
     async deleteAbsenceById(id: string){

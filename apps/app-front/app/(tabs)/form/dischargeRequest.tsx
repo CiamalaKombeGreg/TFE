@@ -6,6 +6,7 @@ import {
   Button,
   StyleSheet,
   Platform,
+  Alert,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -79,6 +80,20 @@ const DischargeRequest = () => {
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
+
+  // Mauvais encodage
+  const wrongStartDate = () =>
+      Alert.alert('La date est mauvaise', 'Votre date de retour est ultérieur à votre date de commencement.', [
+          {text: "J'ai comrpis"},
+      ]
+  );
+
+  const noType = () =>
+    Alert.alert('Aucun type selectionné', 'Vous devez sélectionner un type de congé.', [
+        {text: "J'ai comrpis"},
+    ]
+);
+
   //Changé la date de début
   const onChangeStartDate = (event: any, selectedDate: Date | undefined) => {
     const currentDate = selectedDate || startDate;
@@ -97,7 +112,12 @@ const DischargeRequest = () => {
   const handleSubmit = () => {
     // testing types
     if(type === "None"){
-      console.log("No type selectionned")
+      noType();
+      return 0
+    }
+
+    if(startDate > endDate){
+      wrongStartDate();
       return 0
     }
 
