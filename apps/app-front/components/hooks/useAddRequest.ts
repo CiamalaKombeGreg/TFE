@@ -1,12 +1,17 @@
 import {useQuery, UseQueryOptions} from "@tanstack/react-query";
-import { FormRequestProps } from "../../../../packages/types/formRequest"
 
 export const useAddRequest = (
-  data: FormRequestProps,
+  data: {
+    title: string;
+    typeId: string;
+    startDate: Date;
+    endDate: Date;
+    commentaire: string; 
+  },
   queryParams?: Omit<UseQueryOptions, "queryKey" | "queryFn">
 ) => {
   const query = useQuery({
-    queryKey: ["holiday", data],
+    queryKey: ["holidays", data],
     queryFn: async () => {
       const settings = {
         method: 'POST',
@@ -16,7 +21,8 @@ export const useAddRequest = (
         },
         body: JSON.stringify(data),
       };
-      const response = await fetch(`http://192.168.129.8:3000/absences`, settings);
+      const api_key = process.env.EXPO_PUBLIC_SERVER_URL
+      const response = await fetch(api_key ? `${api_key}/absences` : "http://localhost:3000/absences", settings);
       const fetchedData = await response.json();
       if(fetchedData.error){
         query.isError = true

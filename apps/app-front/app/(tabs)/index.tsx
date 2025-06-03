@@ -1,32 +1,24 @@
-import { router } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import {ActivityIndicator, Button, Text, View} from "react-native";
+import {
+  GoogleSignin,
+} from '@react-native-google-signin/google-signin';
+import * as React from "react"
 
 const Index = () => {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Empty for now...</Text>
-      <Pressable
-        onPress={() =>
-          router.push({ pathname: "/users/[id]", params: { id: "1" } })
-        }
+
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
       >
-        <Text>Go to profil 1</Text>
-      </Pressable>
-      <Pressable
-        onPress={() =>
-          router.push({ pathname: "/users/[id]", params: { id: "2" } })
-        }
-      >
-        <Text>Go to profil 2</Text>
-      </Pressable>
-    </View>
-  );
+          <Text></Text>
+          {/* Header (display current status) and holiday */}
+          {/* Liste of notifications (requests from the closest to the lastest without order of people) */}
+      </View>
+    );
 };
 
 export default Index;

@@ -1,13 +1,17 @@
-/* eslint-disable prettier/prettier */
-import { Controller, Get } from "@nestjs/common";
-import { TypesService } from "./types.service";
+import { Controller, Get, Param } from '@nestjs/common';
+import { TypesService } from './types.service';
 
 @Controller('types')
 export class TypesController {
-    constructor(private absencesService: TypesService) {}
+  constructor(private typesService: TypesService) {}
 
-    @Get()
-    getAbsences(){
-        return this.absencesService.getTypes();
-    }
+  @Get()
+  getTypes() {
+    return this.typesService.getTypes();
+  }
+
+  @Get(':id')
+  getTypeById(@Param('id') id: string) {
+    return this.typesService.getTypeById(id);
+  }
 }

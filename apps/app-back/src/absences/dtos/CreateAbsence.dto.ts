@@ -1,6 +1,5 @@
 /* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-import { $Enums, Prisma } from "@prisma/client";
+import { $Enums } from "@prisma/client";
 import { IsDate, IsDateString, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class CreateAbsenceDto {
@@ -35,6 +34,9 @@ export class CreateAbsenceDto {
     @IsNotEmpty()
     commentaire: string;
 
-    @IsOptional()
-    conges?: Prisma.CongeCreateNestedManyWithoutAbsenceInput;
+    @IsString()
+    @IsNotEmpty()
+    personnelId: string;
+
+    fileKey: string | null;
 }

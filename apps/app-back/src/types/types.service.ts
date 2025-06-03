@@ -9,4 +9,15 @@ export class TypesService {
     getTypes() {
         return this.prisma.absType.findMany();
     }
+
+    getTypeById(id : string) {
+        return this.prisma.absType.findUnique({
+            where : {
+                typeId : id
+            },
+            select : {
+                label : true
+            }
+        })
+    }
 }
