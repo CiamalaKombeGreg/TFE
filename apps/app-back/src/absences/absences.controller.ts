@@ -40,6 +40,11 @@ export class AbsencesController {
         return this.absencesService.getUserAbsences(id);
     }
 
+    @Get('owner/:id')
+    getOwnerEmailById(@Param('id') id: string){
+        return this.absencesService.getAbsenceOwnerById(id);
+    }
+
     @Delete(':id')
     deleteHolidayById(@Param('id') id: string){
         return this.absencesService.deleteAbsenceById(id);
