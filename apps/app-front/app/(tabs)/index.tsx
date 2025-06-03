@@ -15,6 +15,8 @@ const Index = () => {
         }}
       >
           <Text></Text>
+          {/* Header (display current status) and holiday */}
+          {/* Liste of notifications (requests from the closest to the lastest without order of people) */}
       </View>
     );
 };

@@ -56,6 +56,7 @@ const HolidayItem = () => {
     const [type, setType] = useState<string>("");
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
     const [isSupervisor, setIsSupervisor] = useState<boolean>(false);
+    const [owner, setOwner] = useState<string>("");
 
     // Review
     const [formData, setFormData] = useState<FormData>({ comment: '', status: 'ACCEPTER' });
@@ -184,6 +185,7 @@ const HolidayItem = () => {
             if(data.owner !== userInfo?.user.email){
                 setIsSupervisor(true)
             }
+            setOwner(data.owner);
         }
     }
 
@@ -218,6 +220,7 @@ const HolidayItem = () => {
                 <AntDesign disabled={openDelete || openEdit || openStatus} onPress={() => router.push({pathname: '/Requests/MyHolidays'})} name="leftcircleo" size={24} color="black" />
             </View>
             <View>
+                <Text className={('text-xs text-gray-800')}>From : {owner}</Text>
                 <Text className={('text-lg font-bold text-gray-800')}>{data?.title ?? "Chargement"}</Text>
                 <Text className={('text-gray-600')}>Type : {type ?? "Chargement"}</Text>
                 <Text className={('text-gray-600')}>Statut : {data?.status ?? "Chargement"}</Text>

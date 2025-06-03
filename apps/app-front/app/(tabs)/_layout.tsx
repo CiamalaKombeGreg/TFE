@@ -8,6 +8,7 @@ import {
   Button,
   Text,
   View,
+  Image,
   Pressable
 } from "react-native";
 import {
@@ -141,7 +142,15 @@ const DrawerLayout = () => {
   if(!verifiedEmail){
     return (
       <>
-        <SafeAreaView>
+        <SafeAreaView className="flex flex-col bg-cyan-500 justify-center items-center h-full gap-4">
+          {/* Photo */}
+            <View className="flex items-center">
+              <Image
+                className="h-32 w-32 rounded-full object-cover"
+                source={require('../../assets/images/Getaway logo.png')}
+                alt="Profile Picture"
+              />
+            </View>
           <Text>Authenticate with google</Text>
           <Button title="Sign in with Google" onPress={signIn} />
         </SafeAreaView>
