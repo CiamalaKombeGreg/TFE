@@ -91,6 +91,19 @@ export class AbsencesService {
         });
     }
 
+    async getAbsenceOwnerById(id: string) {
+        const user = await this.prisma.absences.findUnique({
+            where : {
+                absId : id
+            },
+            select : {
+                personnel : true
+            }
+        });
+
+        return {status : 200, owner : user?.personnel.email};
+    }
+
     async getUserAbsences(email : string){
         const user = await this.prisma.personnel.findUnique({
             where : {

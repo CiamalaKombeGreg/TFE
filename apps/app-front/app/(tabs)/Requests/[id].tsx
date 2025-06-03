@@ -16,6 +16,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useEditRequest } from '@/components/hooks/useEditRequest';
 import { getFileByKey } from '@/lib/getFile';
 import { getAdmin } from '@/lib/getAdmin';
+import { getOwner } from '@/lib/getSupervisor';
 
 interface FormData {
     comment: string;
@@ -54,6 +55,9 @@ const HolidayItem = () => {
     // Others hooks
     const [type, setType] = useState<string>("");
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
+    const [isSupervisor, setIsSupervisor] = useState<boolean>(false);
+    const [owner, setOwner] = useState<string>("");
+
     // Review
     const [formData, setFormData] = useState<FormData>({ comment: '', status: 'ACCEPTER' });
     const [confirm, setConfirm] = useState<boolean>(false);
@@ -175,6 +179,14 @@ const HolidayItem = () => {
             const data = await getAdmin(userInfo?.user.email);
             setIsAdmin(data.isAdmin);
         }
+
+        if(id !== undefined && userInfo?.user.email !== undefined){
+            const data = await getOwner(id);
+            if(data.owner !== userInfo?.user.email){
+                setIsSupervisor(true)
+            }
+            setOwner(data.owner);
+        }
     }
 
     // Download file (if it has one)
@@ -208,6 +220,7 @@ const HolidayItem = () => {
                 <AntDesign disabled={openDelete || openEdit || openStatus} onPress={() => router.push({pathname: '/Requests/MyHolidays'})} name="leftcircleo" size={24} color="black" />
             </View>
             <View>
+                <Text className={('text-xs text-gray-800')}>From : {owner}</Text>
                 <Text className={('text-lg font-bold text-gray-800')}>{data?.title ?? "Chargement"}</Text>
                 <Text className={('text-gray-600')}>Type : {type ?? "Chargement"}</Text>
                 <Text className={('text-gray-600')}>Statut : {data?.status ?? "Chargement"}</Text>
@@ -228,7 +241,7 @@ const HolidayItem = () => {
                     <Text className='text-white font-bold'>Editer</Text>
                 </TouchableOpacity>
 
-                {/* Delete modal */}
+                {/* Delete button */}
                 {isAdmin && <TouchableOpacity
                     disabled={openDelete || openEdit || openStatus}
                     className={'bg-red-500 hover:bg-red-700 py-2 px-4 rounded'}
@@ -237,8 +250,8 @@ const HolidayItem = () => {
                     <Text className='text-white font-bold'>Effacer</Text>
                 </TouchableOpacity>}
 
-                {/* Review modal */}
-                {data?.status === 'ANALYSE' && <TouchableOpacity
+                {/* Review button */}
+                {isSupervisor && data?.status === 'ANALYSE' && <TouchableOpacity
                     disabled={openDelete || openEdit || openStatus}
                     className={'bg-green-500 hover:bg-green-700 py-2 px-4 rounded'}
                     onPress={() => setOpenStatus(true)}
@@ -246,8 +259,8 @@ const HolidayItem = () => {
                     <Text className='text-white font-bold'>Répondre</Text>
                 </TouchableOpacity>}
 
-                {/* Annuler modal */}
-                {data?.status === 'ANNULER' && <TouchableOpacity
+                {/* Annuler button */}
+                {isSupervisor && data?.status === 'ANNULER' && <TouchableOpacity
                     disabled={openDelete || openEdit || openStatus}
                     className={'bg-green-500 hover:bg-green-700 py-2 px-4 rounded'}
                     onPress={() => setOpenStatus(true)}
@@ -255,8 +268,8 @@ const HolidayItem = () => {
                     <Text className='text-white font-bold'>Activer</Text>
                 </TouchableOpacity>}
 
-                {/* Cancel modal */}
-                {data?.status === 'ACCEPTER' && <TouchableOpacity
+                {/* Cancel button */}
+                {isSupervisor && data?.status === 'ACCEPTER' && <TouchableOpacity
                     disabled={openDelete || openEdit || openStatus}
                     className={'bg-gray-500 hover:bg-gray-700 py-2 px-4 rounded'}
                     onPress={() => {
@@ -268,8 +281,8 @@ const HolidayItem = () => {
                     <Text className='text-white font-bold'>Annuler</Text>
                 </TouchableOpacity>}
 
-                {/* Change modal */}
-                {data?.status === 'REFUSER' && <TouchableOpacity
+                {/* Change button */}
+                {isSupervisor && data?.status === 'REFUSER' && <TouchableOpacity
                     disabled={openDelete || openEdit || openStatus}
                     className={'bg-green-500 hover:bg-green-700 py-2 px-4 rounded'}
                     onPress={() => {
