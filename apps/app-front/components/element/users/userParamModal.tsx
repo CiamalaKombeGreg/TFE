@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native"
+import { View, Text, TouchableOpacity, Alert } from "react-native"
 import Checkbox from 'expo-checkbox';
 import { UsersListModal } from "@/lib/types";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -36,6 +36,8 @@ const changeUserRoles = async ({email, roles} : {email : string, roles : string[
         console.log("Failure");
     }
 
+    if(fetchedData.status === 403) return false;
+
     return roles
 }
 
@@ -57,6 +59,13 @@ export const UserModal = ({currentViewer, isAdminViewer, refresh, closeModal, se
         setSelectedRoles(newRoles);
     }
 
+    // Alert if only one superadmin left
+    const oneAdminLeft = () =>
+        Alert.alert('Un admin est nécessaire', 'Vous ne pouvez pas enlever le rôle admin à cette personne.', [
+            {text: "J'ai comrpis"},
+        ]
+    );
+
     // Query client
         const queryClient = useQueryClient();
     
@@ -64,8 +73,12 @@ export const UserModal = ({currentViewer, isAdminViewer, refresh, closeModal, se
         const mutation = useMutation({
             mutationFn: changeUserRoles,
             onSuccess: (data) => {
-                queryClient.invalidateQueries({ queryKey: ["users"] });
-                refresh({roles : data, email : user.email})
+                if(!data){
+                    oneAdminLeft();
+                }else{
+                    queryClient.invalidateQueries({ queryKey: ["users"] });
+                    refresh({roles : data, email : user.email})
+                }
             },
         });
     

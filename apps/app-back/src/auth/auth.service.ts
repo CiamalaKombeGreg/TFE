@@ -32,13 +32,36 @@ export class AuthService {
             message: 'This email is already in registered.',
           };
         } else {
-          await this.prisma.personnel.create({
-            data: {
-              pseudo: data.nom,
-              email: data.email,
-              role: ["DEV"]
+          // First connected is the superadmin
+          // Verify if there will still be one admin
+          const admins = await this.prisma.personnel.findMany({
+            where : {
+                role : {
+                    has : "SUPERADMIN"
+                }
             },
+            select : {
+                email : true
+            }
           });
+
+          if(admins.length <= 0){
+            await this.prisma.personnel.create({
+              data: {
+                pseudo: data.nom,
+                email: data.email,
+                role: ["DEV", "SUPERADMIN"]
+              },
+            });
+          }else{
+            await this.prisma.personnel.create({
+              data: {
+                pseudo: data.nom,
+                email: data.email,
+                role: ["DEV"]
+              },
+            });
+          }
           return {
             status: '200',
             message: 'This email has been added to the personnel.',
