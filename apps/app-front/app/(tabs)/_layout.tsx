@@ -9,7 +9,8 @@ import {
   Text,
   View,
   Image,
-  Pressable
+  Pressable,
+  TouchableOpacity
 } from "react-native";
 import {
   GoogleSignin,
@@ -18,6 +19,7 @@ import {
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import {AuthResponse} from "@/lib/types";
+import { useRouter } from "expo-router";
 
 
 WebBrowser.maybeCompleteAuthSession();
@@ -66,9 +68,13 @@ const ValidateAuth = async (data: AuthResponse) => {
 const DrawerLayout = () => {
   const [verifiedEmail, setVerifiedEmail] = React.useState<boolean>(false)
 
+  const [userInfo, setUserInfo] = React.useState<AuthResponse | undefined>(undefined);
+
   const queryClient = useQueryClient();
 
   const links = Object.values(tabs);
+
+  const router = useRouter();
 
   /* ---------------------------- AUTHENTICATION ---------------------------- */
 
@@ -94,6 +100,7 @@ const DrawerLayout = () => {
       const response = await GoogleSignin.signIn();
       if (isSuccessResponse(response)) {
         mutation.mutate(response.data)
+        setUserInfo(response.data)
       } else {
         // sign in was cancelled by user
       }
@@ -136,6 +143,74 @@ const DrawerLayout = () => {
       </View>
     );
   };
+    
+    /* ------------------------- CUSTOM DRAWER ------------------------- */
+
+    const CustomDrawerContent = () => {
+      return (
+        <View className="flex-1 justify-between">
+          <View>
+            <Image
+                className="h-32 w-32 rounded-full object-cover self-center mt-8"
+                source={require('../../assets/images/Getaway logo.png')}
+                alt="Profile Picture"
+              />
+          </View>
+          <View>
+            <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)"})}>
+              <View className="bg-[#03a4c3] m-2 p-4 rounded-3xl">
+                <Text className="text-white text-xl"> Accueil </Text>
+              </View>
+            </TouchableOpacity>
+
+            <Text className="text-center text-white text-lg"> ────────  Utilisateurs  ────────</Text>
+
+            <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/users/usersList"})}>
+              <View className="bg-[#03a4c3] m-2 p-4 rounded-3xl">
+                <Text className="text-white text-xl"> Organisation </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/users/Supervisor"})}>
+              <View className="bg-[#03a4c3] m-2 p-4 rounded-3xl">
+                <Text className="text-white text-xl"> Superviseurs </Text>
+              </View>
+            </TouchableOpacity>
+
+            <Text className="text-center text-white text-lg"> ────────  Congés  ────────</Text>
+
+            <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/form/dischargeRequest"})}>
+              <View className="bg-[#03a4c3] m-2 p-4 rounded-3xl">
+                <Text className="text-white text-xl"> Formulaire </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/Requests/MyHolidays"})}>
+              <View className="bg-[#03a4c3] m-2 p-4 rounded-3xl">
+                <Text className="text-white text-xl"> Congés </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/calendar/Calendar"})}>
+              <View className="bg-[#03a4c3] m-2 p-4 rounded-3xl">
+                <Text className="text-white text-xl"> Calendrier </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        
+
+          {/* Profile Button */}
+            <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/users/user"})} className="ml-4">
+              <Image
+                className="h-16 w-16 rounded-full border-2 border-cyan-300 object-cover"
+                src={userInfo?.user.photo ?? ""}
+                alt="Profile Picture"
+              />
+              <Text className="opacity-0">Profil</Text>
+            </TouchableOpacity>
+        </View>
+      )
+    }
 
     /* ---------------------------- DISPLAY ---------------------------- */
 
@@ -151,8 +226,7 @@ const DrawerLayout = () => {
                 alt="Profile Picture"
               />
             </View>
-          <Text>Authenticate with google</Text>
-          <Button title="Sign in with Google" onPress={signIn} />
+          <Button title="Se connecter avec @rush.be" onPress={signIn} />
         </SafeAreaView>
       </>
     )
@@ -160,7 +234,22 @@ const DrawerLayout = () => {
 
   return (
     <>
-      <Drawer>
+      <Drawer
+      drawerContent={() => CustomDrawerContent()}
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#00b8db',
+        },
+        headerTintColor: '#fff',
+        drawerStyle: {
+          backgroundColor: '#0097b4',
+        },
+        drawerLabelStyle: {
+          color: '#fff',
+          fontSize: 16,
+          fontWeight: 'bold',
+        },
+      }}>
         <Drawer.Screen
           name={tabs.Accueil}
           options={{
