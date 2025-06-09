@@ -15,6 +15,7 @@ export class TypesService {
             return this.prisma.absType.createManyAndReturn({
                 data: [
                     {label : "LEGAUX"},
+                    {label : "TELETRAVAIL"},
                     {label : "EXTRA LEGAUX"},
                     {label : "SANS SOLDE"},
                     {label : "MALADIE"},
