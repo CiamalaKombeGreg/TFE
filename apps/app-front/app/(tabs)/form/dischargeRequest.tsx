@@ -82,6 +82,9 @@ const newRequest = async (data: { title: string; startDate: Date; endDate: Date;
 
 };
 
+// Liste of type that need a attachement
+const listTypeWithAttachement = ["LEGAUX", "TELETRAVAIL", "EXTRA LEGAUX", "SANS SOLDE"];
+
 const DischargeRequest = () => {
   // On récupère l'utilisateur
   const [userInfo, setUserInfo] = React.useState<AuthResponse | null>(null);
@@ -99,7 +102,7 @@ const DischargeRequest = () => {
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [comment, setComment] = useState<string>("");
-  const [type, setType] = useState<string>("None");
+  const [type, setType] = useState<{label: string, typeId: string;}>({label : "None", typeId: "None"});
   const [title, setTitle] = useState<string>("");
 
   // Fetch
@@ -120,11 +123,26 @@ const DischargeRequest = () => {
       ]
   );
 
+  // The type is wrong
   const noType = () =>
     Alert.alert('Aucun type selectionné', 'Vous devez sélectionner un type de congé.', [
         {text: "J'ai comrpis"},
     ]
-);
+  );
+
+  // The type need an attachement
+  const attachementNeeded = () =>
+    Alert.alert('Aucune preuve', 'Vous devez joindre un fichier pour demander ce genre de congé.', [
+        {text: "J'ai comrpis"},
+    ]
+  );
+
+  // Missing title or commentary
+  const missingTitleOrComment = () =>
+    Alert.alert('Données manquantes', "Le titre ou le commentaire manque à l'appel.", [
+        {text: "J'ai comrpis"},
+    ]
+  );
 
   //Changé la date de début
   const onChangeStartDate = (event: any, selectedDate: Date | undefined) => {
@@ -157,20 +175,33 @@ const DischargeRequest = () => {
 
   // Soumission
   const handleSubmit = () => {
+    // Testing if type have need attachement
+    if(!(listTypeWithAttachement.includes(type.label)) && file === null){
+      attachementNeeded();
+      return 0
+    }
+
     // testing types
-    if(type === "None"){
+    if(type.typeId === "None"){
       noType();
       return 0
     }
 
+    // Start date after end date
     if(startDate > endDate){
       wrongStartDate();
       return 0
     }
 
+    // Missing title or commentary
+    if(title === '' || comment === ''){
+      missingTitleOrComment();
+      return 0
+    }
+
     // Envoyer les données du formulaire à votre serveur ici
     if(userInfo !== null){
-      mutation.mutate({ title, startDate, endDate, comment, type, email: userInfo.user.email, file });
+      mutation.mutate({ title, startDate, endDate, comment, type : type.typeId, email: userInfo.user.email, file });
     }
 
     // Vider les champs après la soumission
@@ -178,7 +209,7 @@ const DischargeRequest = () => {
     setStartDate(new Date());
     setEndDate(new Date());
     setComment('');
-    setType("None");
+    setType({label : "None", typeId: "None"});
     setFile(null);
   };
   
@@ -260,7 +291,7 @@ const DischargeRequest = () => {
                 {!isLoading && Array.isArray(types) && !isError ? (
                         types.length && (
                             types.map((type: {label: string, typeId: string}) => (
-                                <Picker.Item key={type.typeId} label={type.label} value={type.typeId}/>
+                                <Picker.Item key={type.typeId} label={type.label} value={type}/>
                             ))
                         )
                     ) : (<Picker.Item label="Aucun types trouvées..." value="" />)}

@@ -19,7 +19,7 @@ export const useGetBelgiumHolidays = (
   queryParams?: Omit<UseQueryOptions, "queryKey" | "queryFn">
 ) => {
   const query = useQuery({
-    queryKey: ["belgiumHoliday"],
+    queryKey: ["belgiumHoliday", year],
     queryFn: async () => {
         const response = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/BE`, {
             method: "GET",
