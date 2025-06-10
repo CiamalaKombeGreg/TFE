@@ -6,7 +6,6 @@ import * as React from "react"
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { AuthResponse } from "@/lib/types";
-import { useGetRelatedHolidays } from "@/components/hooks/useGetRelatedHolidays";
 import { useGetStatus } from "@/components/hooks/useGetStatus";
 
 const indexDays = {

@@ -20,6 +20,7 @@ import {
 } from '@react-native-google-signin/google-signin';
 import {AuthResponse} from "@/lib/types";
 import { useRouter } from "expo-router";
+import { getAdmin } from "@/lib/getAdmin";
 
 
 WebBrowser.maybeCompleteAuthSession();
@@ -41,6 +42,7 @@ const tabs = {
   idHoliday: "Requests/[id]",
   userList: "users/usersList",
   supervisor: "users/Supervisor",
+  checkRepas: "checkRepas/CheckRepas"
 };
 
 const ValidateAuth = async (data: AuthResponse) => {
@@ -174,6 +176,12 @@ const DrawerLayout = () => {
             <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/users/Supervisor"})}>
               <View className="bg-[#03a4c3] m-2 p-4 rounded-3xl">
                 <Text className="text-white text-xl"> Superviseurs </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/checkRepas/CheckRepas"})}>
+              <View className="bg-[#03a4c3] m-2 p-4 rounded-3xl">
+                <Text className="text-white text-xl"> Chèques repas </Text>
               </View>
             </TouchableOpacity>
 
@@ -316,6 +324,15 @@ const DrawerLayout = () => {
             headerRight: () => <CustomHeader />,
             drawerLabel: "Supervision",
             title: "Supervision",
+          }}
+        />
+
+        <Drawer.Screen
+          name={tabs.checkRepas}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Chèques repas",
+            title: "Chèques repas",
           }}
         />
       </Drawer>
