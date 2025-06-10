@@ -82,7 +82,7 @@ const CheckRepas = () => {
 
         const total = parseFloat(amount) * (totalMonthDays - totalDays);
 
-        setCalculated(`${total} €`);
+        setCalculated(`${total.toFixed(2)} €`);
 
         setLoading(false);
     };
