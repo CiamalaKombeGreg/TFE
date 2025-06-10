@@ -1,8 +1,7 @@
 import MHCard from "@/components/element/MyHolidays/MHCard";
-import { useGetHolidays } from "@/components/hooks/useGetHolidays";
 import { ActivityIndicator, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { AuthResponse, Holiday, UserRelatedAbsenceProps } from "@/lib/types";
+import { AuthResponse } from "@/lib/types";
 import React, { useState } from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import { Picker } from "@react-native-picker/picker";
@@ -38,7 +37,7 @@ const MyHolidays = () => {
         }
     }
 
-    if(isUsersLoading){
+    if(isUsersLoading || users.length <= 0){
         return (
                     <SafeAreaView className="flex flex-col justify-content items-center"><ActivityIndicator /></SafeAreaView>
                 )

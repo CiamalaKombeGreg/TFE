@@ -226,7 +226,10 @@ const DrawerLayout = () => {
                 alt="Profile Picture"
               />
             </View>
-          <Button title="Se connecter avec @rush.be" onPress={signIn} />
+            <Text className="text-center text-white text-lg m-4 p-2">Votre équipe vous attend pour communiquer vos demandes !</Text>
+          <TouchableOpacity className="flex justify-center items-center bg-cyan-700 m-2 p-2 w-[90%] rounded-xl" onPress={signIn}>
+            <Text className="text-white">Se connecter avec @rush.be</Text>
+          </TouchableOpacity>
         </SafeAreaView>
       </>
     )

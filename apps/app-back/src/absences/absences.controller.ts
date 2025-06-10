@@ -30,9 +30,9 @@ export class AbsencesController {
         return this.absencesService.getAbsences();
     }
 
-    @Get(':id')
-    getAbsenceById(@Param('id') id: string){
-        return this.absencesService.getAbsenceById(id);
+    @Get('today/:id')
+    getCurrentDayHoliday(@Param('id') id: string){
+        return this.absencesService.getCurrentHoliday(id)
     }
 
     @Get('related/:id')
@@ -58,5 +58,15 @@ export class AbsencesController {
     @Post('edit')
     editHoliday(@Body() editAbsenceData : EditAbsenceDto){
         return this.absencesService.editAbsence({id : editAbsenceData.id, comment : editAbsenceData.comment, startDate : editAbsenceData.startDate, endDate : editAbsenceData.endDate});
+    }
+}
+
+@Controller('absencesId')
+export class AbsencesIdController {
+    constructor(private absencesService: AbsencesService ) {}
+
+    @Get(':id')
+    getAbsenceById(@Param('id') id: string){
+        return this.absencesService.getAbsenceById(id);
     }
 }
