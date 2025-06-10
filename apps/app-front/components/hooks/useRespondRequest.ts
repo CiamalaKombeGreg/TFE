@@ -58,6 +58,7 @@ export const useRespondRequest = (id : string) => {
         console.log(data.message)
         queryClient.invalidateQueries({ queryKey: ["holidays", id] });
         queryClient.invalidateQueries({ queryKey: ["holidays"] });
+        queryClient.invalidateQueries({ queryKey: ["currentHoliday"] });
     },
   });
 };

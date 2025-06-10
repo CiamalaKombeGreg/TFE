@@ -189,6 +189,7 @@ const DischargeRequest = () => {
         onSuccess: (data: string) => {
           console.log(data)
             queryClient.invalidateQueries({ queryKey: ["holidays"] });
+            queryClient.invalidateQueries({ queryKey: ["currentHoliday"] });
         },
     });
 
