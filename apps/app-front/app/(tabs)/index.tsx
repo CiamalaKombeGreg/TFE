@@ -88,19 +88,13 @@ const Index = () => {
   // Search bar
   const [search, setSearch] = useState<string>("")
 
-  const setNotification = ({email} : {email : string}) => {
-    if(email !== userInfo?.user.email){
-      
-    }
-  }
-  
   // Current status
   const {data : conge, isLoading} = useGetStatus(userInfo?.user.email || "");
 
   // Related holiday
   const { data : users, isLoading: isUsersLoading  } = useGetRelatedHolidays(userInfo?.user.email || "");
 
-  if(isLoading && currentLoading && isUsersLoading){
+  if(isLoading || currentLoading || isUsersLoading){
     return <SafeAreaView className="flex flex-col justify-content items-center"><ActivityIndicator /></SafeAreaView>
   }else if(currentBelgiumHoliday === ""){
     changeDate()
@@ -130,7 +124,7 @@ const Index = () => {
           <ScrollView>
             <View>
             {users.map((user) => 
-                user.conges.sort((element_1, element_2) => orderHoliday(element_1.startDate, element_2.startDate))
+                (user.email !== userInfo?.user.email) && user.conges.sort((element_1, element_2) => orderHoliday(element_1.startDate, element_2.startDate))
                 .map((element) =>
                         (element.status === "ANALYSE") && (element.title.includes(search) || search === "") && <MHCard key={element.absId} id={element.absId} title={element.title} status={element.status} beginDate={new Date(element.startDate)} endDate={new Date(element.endDate)} />
                     )
