@@ -1,14 +1,18 @@
-import {ActivityIndicator, Button, Text, View} from "react-native";
+import {ActivityIndicator, Button, Text, TextInput, View} from "react-native";
 import {
   GoogleSignin,
 } from '@react-native-google-signin/google-signin';
 import * as React from "react"
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
-import { AuthResponse } from "@/lib/types";
+import { AuthResponse, Holiday, UserRelatedAbsenceProps } from "@/lib/types";
 import { useGetStatus } from "@/components/hooks/useGetStatus";
 import { useGetBelgiumHolidays } from "@/components/hooks/useGetBelgiumHolidays";
 import { toDateId } from "@marceloterreiro/flash-calendar";
+import { useGetRelatedHolidays } from "@/components/hooks/useGetRelatedHolidays";
+import { ScrollView } from "react-native-gesture-handler";
+import { orderHoliday } from "./Requests/MyHolidays";
+import MHCard from "@/components/element/MyHolidays/MHCard";
 
 const today = new Date();
 const todayId = toDateId(today);
@@ -59,11 +63,44 @@ const Index = () => {
     }
     setCurrentBelgiumHoliday("Aucun congé");
   }
+
+  // Verify if holiday is today
+  const isTodayBetweenDates = (startStr: string, endStr: string): boolean => {
+    const startDate = new Date(startStr);
+    const endDate = new Date(endStr);
+  
+    // Get only the date parts (year, month, day)
+    const today = new Date();
+    const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    const endDateOnly = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+  
+    return todayDateOnly >= startDateOnly && todayDateOnly <= endDateOnly;
+  };
+
+  // Create element display of holidays for the header
+  const setCurrentPersonnalHoliday = (element : Holiday) => {
+    if(isTodayBetweenDates(element.startDate, element.endDate)){
+      return <Text key={element.absId} className="text-cyan-700 text-2xl">{element.title}</Text>
+    }
+  }
+
+  // Search bar
+  const [search, setSearch] = useState<string>("")
+
+  const setNotification = ({email} : {email : string}) => {
+    if(email !== userInfo?.user.email){
+      
+    }
+  }
   
   // Current status
   const {data : conge, isLoading} = useGetStatus(userInfo?.user.email || "");
 
-  if(isLoading && currentLoading){
+  // Related holiday
+  const { data : users, isLoading: isUsersLoading  } = useGetRelatedHolidays(userInfo?.user.email || "");
+
+  if(isLoading && currentLoading && isUsersLoading){
     return <SafeAreaView className="flex flex-col justify-content items-center"><ActivityIndicator /></SafeAreaView>
   }else if(currentBelgiumHoliday === ""){
     changeDate()
@@ -77,10 +114,29 @@ const Index = () => {
             {/* Week day */}
             <Text className="text-cyan-700 font-bold text-5xl">{indexDays[currentDate.getDay() as 1 | 2 | 3 | 4 | 5 | 6 | 7]}</Text>
             {/* Status */}
-            {Array.isArray(conge) && conge.length > 0 && (conge.length > 1 ? <Text>Attention : Deux congés se superposent</Text> : <Text className="text-cyan-700 text-xl">Congé actuel : {conge[0].title}</Text>)}
-            {Array.isArray(conge) && conge.length === 0 && <Text className="text-cyan-700 text-2xl">{currentBelgiumHoliday}</Text>}
+            {Array.isArray(conge) && conge.map((element) => setCurrentPersonnalHoliday(element))}
+            {todayId === currentBelgiumHoliday && <Text className="text-cyan-700 text-2xl">{currentBelgiumHoliday}</Text>}
           </View>
-          {/* Liste of notifications (requests from the closest to the lastest without order of people) */}
+          {/* Liste of notifications */}
+          <View className='w-11/12 mx-auto my-8'>
+            <Text className="text-lg text-gray-700 mb-1">Filtre</Text>
+            <TextInput
+            onChangeText={setSearch}
+              className='bg-white border border-gray-300 rounded-xl px-4 py-3 text-base shadow-sm'
+              placeholderTextColor="#999"
+              placeholder="Rechercher"
+            />
+          </View>
+          <ScrollView>
+            <View>
+            {users.map((user) => 
+                user.conges.sort((element_1, element_2) => orderHoliday(element_1.startDate, element_2.startDate))
+                .map((element) =>
+                        (element.status === "ANALYSE") && (element.title.includes(search) || search === "") && <MHCard key={element.absId} id={element.absId} title={element.title} status={element.status} beginDate={new Date(element.startDate)} endDate={new Date(element.endDate)} />
+                    )
+            )}
+            </View>
+          </ScrollView>
       </SafeAreaView>
     );
   }

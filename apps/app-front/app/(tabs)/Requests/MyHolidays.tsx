@@ -8,6 +8,15 @@ import { Picker } from "@react-native-picker/picker";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useGetRelatedHolidays } from "@/components/hooks/useGetRelatedHolidays";
 
+// Sort on start date
+export const orderHoliday = (firstDate : Date, secondDate : Date) => {
+    if(firstDate >= secondDate){
+        return 1
+    }else{
+        return -1
+    }
+}
+
 const MyHolidays = () => {
     // Authentification user
     const [userInfo, setUserInfo] = useState<AuthResponse | null>(null);
@@ -27,15 +36,6 @@ const MyHolidays = () => {
 
     // Status hook
     const [status, setStatus] = useState<"ALL" | "ACCEPTER" | "REFUSER" | "ANALYSE" | "ANNULER">("ALL");
-
-    // Sort on start date
-    const orderHoliday = (firstDate : Date, secondDate : Date) => {
-        if(firstDate >= secondDate){
-            return 1
-        }else{
-            return -1
-        }
-    }
 
     if(isUsersLoading || users.length <= 0){
         return (

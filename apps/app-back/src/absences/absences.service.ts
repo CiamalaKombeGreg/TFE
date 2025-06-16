@@ -94,12 +94,6 @@ export class AbsencesService {
     getCurrentHoliday(email : string) {
         return this.prisma.absences.findMany({
             where : {
-                startDate : {
-                    lte : new Date()
-                },
-                endDate : {
-                    gte : new Date()
-                },
                 personnel : {
                     email : email
                 },
