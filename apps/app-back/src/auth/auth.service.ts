@@ -21,9 +21,6 @@ export class AuthService {
       ) {
         const findPersonnel = await this.prisma.personnel.findUnique({
           where: { email: result.email },
-          select: {
-            conges: true,
-          }
         });
 
         if (findPersonnel) {
@@ -46,22 +43,56 @@ export class AuthService {
           });
 
           if(admins.length <= 0){
-            await this.prisma.personnel.create({
+            const user = await this.prisma.personnel.create({
               data: {
                 pseudo: data.nom,
                 email: data.email,
                 role: ["DEV", "SUPERADMIN"]
               },
             });
+            // Setup allowed holidays
+            const types = await this.prisma.absType.findMany({
+              select : {
+                typeId : true
+              }
+            });
+
+            const allowedData : {personnelId : string, typeId : string}[] = []
+
+            for(const type of types){
+              allowedData.push({personnelId : user.prsId, typeId : type.typeId})
+            }
+
+            await this.prisma.allowedHoliday.createMany({
+              data : allowedData
+            })
           }else{
-            await this.prisma.personnel.create({
+            const user = await this.prisma.personnel.create({
               data: {
                 pseudo: data.nom,
                 email: data.email,
                 role: ["DEV"]
               },
             });
+
+            // Setup allowed holidays
+            const types = await this.prisma.absType.findMany({
+              select : {
+                typeId : true
+              }
+            });
+
+            const allowedData : {personnelId : string, typeId : string}[] = []
+
+            for(const type of types){
+              allowedData.push({personnelId : user.prsId, typeId : type.typeId})
+            }
+
+            await this.prisma.allowedHoliday.createMany({
+              data : allowedData
+            })
           }
+
           return {
             status: '200',
             message: 'This email has been added to the personnel.',
