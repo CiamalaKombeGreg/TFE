@@ -21,6 +21,9 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { getIdByEmail } from "@/lib/getIdByEmail";
 import * as DocumentPicker from 'expo-document-picker';
 import { ScrollView } from "react-native-gesture-handler";
+import { useGetRelatedHolidays } from "@/components/hooks/useGetRelatedHolidays";
+import { doDateRangesOverlap } from "@/lib/isOverlapping";
+import { useGetBelgiumHolidays } from "@/components/hooks/useGetBelgiumHolidays";
 
 const newRequest = async (data: { title: string; startDate: Date; endDate: Date; comment: string; type: string; email: string, file: DocumentPicker.DocumentPickerResult | null }) => {
   const id = await getIdByEmail(data.email);
@@ -106,7 +109,11 @@ const DischargeRequest = () => {
   const [title, setTitle] = useState<string>("");
 
   // Fetch
-  const {data: types, isError,isLoading, error} = useGetTypes();
+  const { data: types, isError, isLoading, error } = useGetTypes();
+
+  const { data : users, isLoading: isUsersLoading  } = useGetRelatedHolidays(userInfo?.user.email || "");
+
+  const {data : belgiumHolidays, isLoading : currentLoading} = useGetBelgiumHolidays(`${new Date().getFullYear()}`);
 
   // Query client
   const queryClient = useQueryClient();
@@ -144,6 +151,13 @@ const DischargeRequest = () => {
     ]
   );
 
+  // Superposed holiday
+  const selectedAnAlreadyTakenDate = () =>
+    Alert.alert('Superposition de congé', "Votre période sélectionner comprend des jours de congés existants.", [
+        {text: "J'ai comrpis"},
+    ]
+  );
+
   //Changé la date de début
   const onChangeStartDate = (event: any, selectedDate: Date | undefined) => {
     const currentDate = selectedDate || startDate;
@@ -173,17 +187,52 @@ const DischargeRequest = () => {
     }
   }
 
+  // Verify if dates are superposed with others holidays
+  const verifyDates = () => {
+    for(const user of users){
+      if(user.email === userInfo?.user.email){
+        // Verify for personnal holidays
+        for(const conge of user.conges){
+          const isOverlapping = doDateRangesOverlap({start1Str : conge.startDate, end1Str : conge.endDate, start2Str : startDate, end2Str : endDate});
+          if(isOverlapping){
+            return true;
+          }
+        }
+        // Verify for national holidays
+        if(Array.isArray(belgiumHolidays)){
+          for(const element of belgiumHolidays){
+            const holidayDate = new Date(element.dateId);
+            const isOverlapping = doDateRangesOverlap({start1Str : holidayDate, end1Str : holidayDate, start2Str : startDate, end2Str : endDate});
+            if(isOverlapping){
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
   // Soumission
   const handleSubmit = () => {
-    // Testing if type have need attachement
-    if(!(listTypeWithAttachement.includes(type.label)) && file === null){
-      attachementNeeded();
+    // testing types
+    if(type.label === "None"){
+      noType();
       return 0
     }
 
-    // testing types
-    if(type.typeId === "None"){
-      noType();
+    // Testing if selected dates are already taken
+    const isDateAlreadyTaken = verifyDates();
+
+    if(isDateAlreadyTaken){
+      selectedAnAlreadyTakenDate()
+      return 0
+    }
+
+    // Testing if type have need attachement
+    if(!(listTypeWithAttachement.includes(type.label)) && file === null){
+      attachementNeeded();
       return 0
     }
 
@@ -218,13 +267,12 @@ const DischargeRequest = () => {
    const mutation = useMutation({
         mutationFn: newRequest,
         onSuccess: (data: string) => {
-          console.log(data)
             queryClient.invalidateQueries({ queryKey: ["holidays"] });
             queryClient.invalidateQueries({ queryKey: ["currentHoliday"] });
         },
     });
 
-  if(isLoading){
+  if(isLoading || isUsersLoading || currentLoading){
     return <SafeAreaView className="flex flex-col justify-content items-center"><ActivityIndicator /></SafeAreaView>
   }else{
     return (
