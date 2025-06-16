@@ -52,6 +52,25 @@ export class PersonnelService {
         });
     }
 
+    // Get user by ID
+    getUserById(id : string){
+        return this.prisma.personnel.findUnique({
+            where : {
+                prsId : id
+            },
+            select : {
+                prsId: true,
+                pseudo : true,
+                email : true,
+                role: true,
+                supervisor: true,
+                supervise: true,
+                conges: true,
+                totalConge: true,
+            }
+        })
+    }
+
     // Update supervisor
     async updateSupervision({supervisorIdList, superviseId} : {supervisorIdList : string[], superviseId : string}){
         // Add every supervision

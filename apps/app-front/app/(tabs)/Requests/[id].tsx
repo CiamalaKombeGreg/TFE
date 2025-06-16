@@ -43,14 +43,14 @@ const HolidayItem = () => {
     const deleteHoliday = useDeleteHoliday(id);
     const updateHoliday = useRespondRequest(id);
     const editHoliday = useEditRequest(id);
-    const router = useRouter()
+    const router = useRouter();
 
     // Modals hooks
-    const [openEdit, setOpenEdit] = useState<boolean>(false)
-    const [openDelete, setOpenDelete] = useState<boolean>(false)
-    const [openStatus, setOpenStatus] = useState<boolean>(false)
-    const [openCancel, setOpenCancel] = useState<boolean>(false)
-    const [openRefuse, setOpenRefuse] = useState<boolean>(false)
+    const [openEdit, setOpenEdit] = useState<boolean>(false);
+    const [openDelete, setOpenDelete] = useState<boolean>(false);
+    const [openStatus, setOpenStatus] = useState<boolean>(false);
+    const [openCancel, setOpenCancel] = useState<boolean>(false);
+    const [openRefuse, setOpenRefuse] = useState<boolean>(false);
 
     // Others hooks
     const [type, setType] = useState<string>("");

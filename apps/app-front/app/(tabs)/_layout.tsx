@@ -42,7 +42,8 @@ const tabs = {
   idHoliday: "Requests/[id]",
   userList: "users/usersList",
   supervisor: "users/Supervisor",
-  checkRepas: "checkRepas/CheckRepas"
+  checkRepas: "checkRepas/CheckRepas",
+  userHolidayParameter: "users/[id]"
 };
 
 const ValidateAuth = async (data: AuthResponse) => {
@@ -333,6 +334,15 @@ const DrawerLayout = () => {
             headerRight: () => <CustomHeader />,
             drawerLabel: "Chèques repas",
             title: "Chèques repas",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.userHolidayParameter}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Paramètre de congé",
+            drawerItemStyle: {display: 'none'},
+            title: "Paramètre de congé",
           }}
         />
       </Drawer>
