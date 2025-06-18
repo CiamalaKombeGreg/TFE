@@ -30,10 +30,37 @@ const CheckRepas = () => {
 
     const [calculated, setCalculated] = useState<string>('0,00 €');
 
-    // Convert milliseconds to day
-    function millisecondsToDays(ms: number): number {
-        const millisecondsPerDay = 1000 * 60 * 60 * 24;
-        return Math.floor(ms / millisecondsPerDay);
+    function countHolidayPeriod(start: Date, end: Date): number {
+    
+        const realStart = start < end ? start : end;
+        const realEnd = start < end ? end : start;
+
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth();
+
+        // Month boundaries
+        const monthStart = new Date(currentYear, currentMonth, 1);
+        const monthEnd = new Date(currentYear, currentMonth + 1, 0);
+
+        // Overlapping period
+        const rangeStart = realStart > monthStart ? realStart : monthStart;
+        const rangeEnd = realEnd < monthEnd ? realEnd : monthEnd;
+
+        if (rangeStart > rangeEnd) return 0;
+
+        let count = 0;
+        const current = new Date(rangeStart);
+
+        while (current <= rangeEnd) {
+            const day = current.getDay();
+            if (day !== 0 && day !== 6) {
+            count++;
+            }
+            current.setDate(current.getDate() + 1);
+        }
+
+        return count;
     }
 
     // Count active days in each months
@@ -68,17 +95,24 @@ const CheckRepas = () => {
         // Variable for calcul
         let totalDays = 0;
 
+        const totalMonthDays = countWeekdaysInMonth(new Date().getFullYear(), new Date().getMonth())
+
         // Calculate
         for(const fetchedUser of users){
             if(fetchedUser.pseudo === user){
                 for(const conge of fetchedUser.conges){
-                    const congeDay =  millisecondsToDays(new Date(conge.endDate).getTime() - new Date(conge.startDate).getTime()) + 1;
-                    totalDays += congeDay;
+                    if(conge.status === "ACCEPTER"){
+                        const congeDay =  countHolidayPeriod(new Date(conge.endDate), new Date(conge.startDate));
+                        console.log(congeDay);
+                        totalDays += congeDay;
+                    }
                 }
                 break;
             }
         }
-        const totalMonthDays = countWeekdaysInMonth(new Date().getFullYear(), new Date().getMonth())
+
+        console.log(totalMonthDays)
+        console.log(totalDays)
 
         const total = parseFloat(amount) * (totalMonthDays - totalDays);
 
@@ -99,14 +133,9 @@ const CheckRepas = () => {
 
     return (
         <SafeAreaView className="flex flex-col justify-start items-center bg-cyan-500 h-full">
-            {/* Title */}
-            <View className="m-4">
-                <Text className="text-white text-5xl">Chèques Repas</Text>
-            </View>
-
             {/* Calcul (user + number) */}
             <View className="flex m-8 p-4 bg-cyan-600 w-[70%] rounded-3xl">
-                <Text className="text-lg text-center text-white mb-2">User</Text>
+                <Text className="text-lg text-center text-white mb-2">Utilisateur</Text>
                 <Picker
                     selectedValue={user}
                     onValueChange={(itemValue, itemIndex) =>
@@ -117,7 +146,7 @@ const CheckRepas = () => {
                     ))}
                 </Picker>
 
-                <Text className="text-lg text-center text-white mb-2">Amount</Text>
+                <Text className="text-lg text-center text-white mb-2">Valeur</Text>
                 <TextInput
                     className="border border-gray-300 text-white rounded px-4 py-2 w-full mb-4"
                     placeholder="Entrez le montant en €"

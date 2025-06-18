@@ -24,6 +24,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { useGetRelatedHolidays } from "@/components/hooks/useGetRelatedHolidays";
 import { doDateRangesOverlap } from "@/lib/isOverlapping";
 import { useGetBelgiumHolidays } from "@/components/hooks/useGetBelgiumHolidays";
+import { useGetAllowedHolidays } from "@/components/hooks/useGetAllowedHolidays";
 
 const newRequest = async (data: { title: string; startDate: Date; endDate: Date; comment: string; type: string; email: string, file: DocumentPicker.DocumentPickerResult | null }) => {
   const id = await getIdByEmail(data.email);
@@ -115,6 +116,8 @@ const DischargeRequest = () => {
 
   const {data : belgiumHolidays, isLoading : currentLoading} = useGetBelgiumHolidays(`${new Date().getFullYear()}`);
 
+  const { data : allowedHolidays, isLoading : allowedLoading } = useGetAllowedHolidays(userInfo?.user.email || "") as any;
+
   // Query client
   const queryClient = useQueryClient();
 
@@ -154,6 +157,13 @@ const DischargeRequest = () => {
   // Superposed holiday
   const selectedAnAlreadyTakenDate = () =>
     Alert.alert('Superposition de congé', "Votre période sélectionner comprend des jours de congés existants.", [
+        {text: "J'ai comrpis"},
+    ]
+  );
+
+  // Warn about holiday limit
+  const limitReached = (label : string, extraDays : number) =>
+    Alert.alert(`Limite atteinte pour ${label}`, `Attention, vous avez atteint la limite imposée par vos supérieurs (${extraDays}).`, [
         {text: "J'ai comrpis"},
     ]
   );
@@ -198,6 +208,7 @@ const DischargeRequest = () => {
             return true;
           }
         }
+
         // Verify for national holidays
         if(Array.isArray(belgiumHolidays)){
           for(const element of belgiumHolidays){
@@ -271,14 +282,79 @@ const DischargeRequest = () => {
             queryClient.invalidateQueries({ queryKey: ["currentHoliday"] });
         },
     });
+  
+  // Count how many holidays used in this year
+ const countDaysInCurrentYear = (startStr: Date, endStr: Date): number => {
+  const start = new Date(startStr);
+  const end = new Date(endStr);
 
-  if(isLoading || isUsersLoading || currentLoading){
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    throw new Error('Invalid date input.');
+  }
+    // Ensure correct order
+    const realStart = start < end ? start : end;
+    const realEnd = start < end ? end : start;
+  
+    const today = new Date();
+    const currentYear = today.getFullYear();
+  
+    // Boundaries of current year
+    const yearStart = new Date(currentYear, 0, 1);   // Jan 1
+    const yearEnd = new Date(currentYear, 11, 31);   // Dec 31
+  
+    // Determine overlap
+    const rangeStart = realStart > yearStart ? realStart : yearStart;
+    const rangeEnd = realEnd < yearEnd ? realEnd : yearEnd;
+  
+    if (rangeStart > rangeEnd) return 0;
+  
+    // Count days in overlap (inclusive)
+    let count = 0;
+    const current = new Date(rangeStart);
+  
+    while (current <= rangeEnd) {
+      count++;
+      current.setDate(current.getDate() + 1);
+    }
+  
+    return count;
+  };
+  
+  // Verify limite of holidays authorize
+  const verifyLimit = (value : {
+    label: string;
+    typeId: string;
+  }) => {
+    for(const user of users){
+      if(user.email === userInfo?.user.email){
+        for(const element of allowedHolidays){
+          if(element.typeId === value.typeId){
+            let totalNumberOfHolidays = 0;
+            for(const conge of user.conges){
+              const numberOfDays = countDaysInCurrentYear(conge.startDate, conge.endDate);
+              if(conge.typeId === value.typeId){
+                totalNumberOfHolidays += numberOfDays;
+              }
+            }
+            if(totalNumberOfHolidays >= element.remainingDays){
+              limitReached(value.label, totalNumberOfHolidays - element.remainingDays);
+            }
+            break;
+          }
+        }
+
+        break;
+      }
+    }
+  }
+
+  if(isLoading || isUsersLoading || currentLoading || allowedLoading){
     return <SafeAreaView className="flex flex-col justify-content items-center"><ActivityIndicator /></SafeAreaView>
   }else{
     return (
       <ScrollView>
         <SafeAreaView style={styles.container}>
-          <Text style={styles.title}>Mon Formulaire</Text>
+          <Text style={styles.title}>Formulaire</Text>
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Titre :</Text>
@@ -333,7 +409,10 @@ const DischargeRequest = () => {
             <Picker
                 selectedValue={type}
                 style={styles.picker}
-                onValueChange={(itemValue) => setType(itemValue)}
+                onValueChange={(itemValue) => {
+                  setType(itemValue);
+                  verifyLimit(itemValue);
+                }}
               >
                 <Picker.Item label="Selectionnez un type" value="None"/>
                 {!isLoading && Array.isArray(types) && !isError ? (

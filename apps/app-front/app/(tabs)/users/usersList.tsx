@@ -118,11 +118,6 @@ const UsersList = () => {
         }
         return (
             <ScrollView className="z-10 relative">
-                {/* Title */}
-                <View className="z-10">
-                    <Text className="text-3xl p-4">Utilisateurs</Text>
-                </View>
-
                 {/* Tabs to select enums */}
                 <View className="z-10">
                     <Picker
