@@ -141,7 +141,7 @@ const DrawerLayout = () => {
     return (
       <View className="bg-blue-500 hover:bg-blue-700 py-2 px-4 m-2 rounded">
         <Pressable onPress={signOut}>
-          <Text className="text-white font-bold">Sign Out</Text>
+          <Text className="text-white text-sm font-bold">Se déconnecter</Text>
         </Pressable>
       </View>
     );
