@@ -177,8 +177,10 @@ const HolidayItem = () => {
         setType(type);
         if(userInfo?.user.email !== undefined){
             const data = await getAdmin(userInfo?.user.email);
-            setIsSupervisor(true);
-            setIsAdmin(data.isAdmin);
+            if(data.isAdmin){
+                setIsSupervisor(true);
+                setIsAdmin(true);
+            }
         }
 
         if(id !== undefined && userInfo?.user.email !== undefined){
