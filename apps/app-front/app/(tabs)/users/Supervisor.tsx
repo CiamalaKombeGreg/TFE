@@ -54,11 +54,6 @@ const Supervisor = () => {
     } else {
         return (
             <ScrollView>
-                {/* Title */}
-                <View className="z-10">
-                    <Text className="text-3xl p-4">Supervision</Text>
-                </View>
-    
                 {/* Tabs to select users */}
                 <View className="z-10">
                     <Picker

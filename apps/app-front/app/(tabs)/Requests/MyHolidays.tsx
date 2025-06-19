@@ -46,9 +46,8 @@ const MyHolidays = () => {
     }else{
         return(
             <SafeAreaView className="flex flex-col items-center justify-center bg-gray-100 h-full w-full">
-                {/* Title & selection */}
+                {/* selection */}
                 <View className="flex w-full p-2 bg-gray-200">
-                    <Text className="text-bold text-4xl m-2 text-center">Mes congés</Text>
                     {/* Tabs to select users & status */}
                     <View className="flex gap-4 z-10">
                         <View className="m-2">
