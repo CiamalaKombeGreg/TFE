@@ -43,7 +43,11 @@ const tabs = {
   userList: "users/usersList",
   supervisor: "users/Supervisor",
   checkRepas: "checkRepas/CheckRepas",
-  userHolidayParameter: "users/[id]"
+  userHolidayParameter: "users/[id]",
+  help: "help/help",
+  helpType: "help/helpType",
+  helpForm: "help/helpFormulaire",
+  helpHoli: "help/helpHoliday",
 };
 
 const ValidateAuth = async (data: AuthResponse) => {
@@ -209,14 +213,24 @@ const DrawerLayout = () => {
         
 
           {/* Profile Button */}
-            <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/users/user"})} className="ml-4">
-              <Image
-                className="h-16 w-16 rounded-full border-2 border-cyan-300 object-cover"
-                src={userInfo?.user.photo ?? ""}
-                alt="Profile Picture"
-              />
-              <Text className="opacity-0">Profil</Text>
-            </TouchableOpacity>
+            <View className="flex flex-row">
+              <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/users/user"})} className="ml-4">
+                <Image
+                  className="h-16 w-16 rounded-full border-2 border-cyan-300 object-cover"
+                  src={userInfo?.user.photo ?? ""}
+                  alt="Profile Picture"
+                />
+                <Text className="opacity-0">Profil</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/help/help"})} className="ml-4">
+                <Image
+                  className="h-16 w-16 rounded-full border-2 border-cyan-300 object-cover"
+                  source={require('../../assets/images/question.png')}
+                  alt="Help picture"
+                />
+                <Text className="opacity-0">Help</Text>
+              </TouchableOpacity>
+            </View>
         </View>
       )
     }
@@ -343,6 +357,42 @@ const DrawerLayout = () => {
             drawerLabel: "Paramètre de congé",
             drawerItemStyle: {display: 'none'},
             title: "Paramètre de congé",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.help}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Information",
+            drawerItemStyle: {display: 'none'},
+            title: "Information",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.helpType}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Quel type ?",
+            drawerItemStyle: {display: 'none'},
+            title: "Quel type ?",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.helpForm}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Utiliser le formulaire...",
+            drawerItemStyle: {display: 'none'},
+            title: "Utiliser le formulaire...",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.helpHoli}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Gérer les congés",
+            drawerItemStyle: {display: 'none'},
+            title: "Gérer les congés",
           }}
         />
       </Drawer>
