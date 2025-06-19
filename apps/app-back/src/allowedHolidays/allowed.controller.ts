@@ -14,15 +14,13 @@ export class AllowedController {
   create(
     @Body()
     data: {
-      remainingDays: number;
       personnelId: string;
-      typeId: string;
+      allowedHolidays: {
+        remainingDays: number;
+        typeId: string;
+      }[];
     },
   ) {
-    return this.allowedService.updateRemainingDays({
-      remainingDays: data.remainingDays,
-      personnelId: data.personnelId,
-      typeId: data.typeId,
-    });
+    return this.allowedService.updateRemainingDays(data);
   }
 }

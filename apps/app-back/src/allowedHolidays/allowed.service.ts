@@ -6,6 +6,31 @@ export class AllowedService {
   constructor(private prisma: PrismaService) {}
 
   async getAllowedHolidaysById(id: string) {
+    // Working id
+    let usedId = id;
+
+    // Test if it is an id or an email
+    const user = await this.prisma.personnel.findUnique({
+      where: {
+        prsId: usedId,
+      },
+    });
+
+    if (!user) {
+      const userByEmail = await this.prisma.personnel.findUnique({
+        where: {
+          email: usedId,
+        },
+        select: {
+          prsId: true,
+        },
+      });
+
+      if (userByEmail) {
+        usedId = userByEmail.prsId;
+      }
+    }
+
     // Verify if types are missing
     const types = await this.prisma.absType.findMany({
       select: {
@@ -15,7 +40,7 @@ export class AllowedService {
 
     const allowedHolidays = await this.prisma.allowedHoliday.findMany({
       where: {
-        personnelId: id,
+        personnelId: usedId,
       },
     });
 
@@ -31,7 +56,7 @@ export class AllowedService {
         }
       }
       if (!haveAnExistingType) {
-        allowedData.push({ personnelId: id, typeId: type.typeId });
+        allowedData.push({ personnelId: usedId, typeId: type.typeId });
       }
     }
 
@@ -42,28 +67,35 @@ export class AllowedService {
       });
     }
 
-    return await this.prisma.allowedHoliday.findMany({
+    const fetched = await this.prisma.allowedHoliday.findMany({
       where: {
-        personnelId: id,
+        personnelId: usedId,
       },
     });
+
+    return fetched;
   }
 
-  updateRemainingDays(data: {
-    remainingDays: number;
+  async updateRemainingDays(data: {
     personnelId: string;
-    typeId: string;
+    allowedHolidays: {
+      remainingDays: number;
+      typeId: string;
+    }[];
   }) {
-    return this.prisma.allowedHoliday.update({
-      data: {
-        remainingDays: data.remainingDays,
-      },
-      where: {
-        personnelId_typeId: {
-          personnelId: data.personnelId,
-          typeId: data.typeId,
+    for (const element of data.allowedHolidays) {
+      await this.prisma.allowedHoliday.update({
+        where: {
+          personnelId_typeId: {
+            personnelId: data.personnelId,
+            typeId: element.typeId,
+          },
         },
-      },
-    });
+        data: {
+          remainingDays: element.remainingDays,
+        },
+      });
+    }
+    return { status: 200, message: 'succeded' };
   }
 }
