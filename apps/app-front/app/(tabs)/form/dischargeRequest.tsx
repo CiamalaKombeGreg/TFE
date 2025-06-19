@@ -21,6 +21,10 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { getIdByEmail } from "@/lib/getIdByEmail";
 import * as DocumentPicker from 'expo-document-picker';
 import { ScrollView } from "react-native-gesture-handler";
+import { useGetRelatedHolidays } from "@/components/hooks/useGetRelatedHolidays";
+import { doDateRangesOverlap } from "@/lib/isOverlapping";
+import { useGetBelgiumHolidays } from "@/components/hooks/useGetBelgiumHolidays";
+import { useGetAllowedHolidays } from "@/components/hooks/useGetAllowedHolidays";
 
 const newRequest = async (data: { title: string; startDate: Date; endDate: Date; comment: string; type: string; email: string, file: DocumentPicker.DocumentPickerResult | null }) => {
   const id = await getIdByEmail(data.email);
@@ -82,6 +86,9 @@ const newRequest = async (data: { title: string; startDate: Date; endDate: Date;
 
 };
 
+// Liste of type that need a attachement
+const listTypeWithAttachement = ["LEGAUX", "TELETRAVAIL", "EXTRA LEGAUX", "SANS SOLDE"];
+
 const DischargeRequest = () => {
   // On récupère l'utilisateur
   const [userInfo, setUserInfo] = React.useState<AuthResponse | null>(null);
@@ -99,11 +106,17 @@ const DischargeRequest = () => {
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [comment, setComment] = useState<string>("");
-  const [type, setType] = useState<string>("None");
+  const [type, setType] = useState<{label: string, typeId: string;}>({label : "None", typeId: "None"});
   const [title, setTitle] = useState<string>("");
 
   // Fetch
-  const {data: types, isError,isLoading, error} = useGetTypes();
+  const { data: types, isError, isLoading, error } = useGetTypes();
+
+  const { data : users, isLoading: isUsersLoading  } = useGetRelatedHolidays(userInfo?.user.email || "");
+
+  const {data : belgiumHolidays, isLoading : currentLoading} = useGetBelgiumHolidays(`${new Date().getFullYear()}`);
+
+  const { data : allowedHolidays, isLoading : allowedLoading } = useGetAllowedHolidays(userInfo?.user.email || "") as any;
 
   // Query client
   const queryClient = useQueryClient();
@@ -120,11 +133,40 @@ const DischargeRequest = () => {
       ]
   );
 
+  // The type is wrong
   const noType = () =>
     Alert.alert('Aucun type selectionné', 'Vous devez sélectionner un type de congé.', [
         {text: "J'ai comrpis"},
     ]
-);
+  );
+
+  // The type need an attachement
+  const attachementNeeded = () =>
+    Alert.alert('Aucune preuve', 'Vous devez joindre un fichier pour demander ce genre de congé.', [
+        {text: "J'ai comrpis"},
+    ]
+  );
+
+  // Missing title or commentary
+  const missingTitleOrComment = () =>
+    Alert.alert('Données manquantes', "Le titre ou le commentaire manque à l'appel.", [
+        {text: "J'ai comrpis"},
+    ]
+  );
+
+  // Superposed holiday
+  const selectedAnAlreadyTakenDate = () =>
+    Alert.alert('Superposition de congé', "Votre période sélectionner comprend des jours de congés existants.", [
+        {text: "J'ai comrpis"},
+    ]
+  );
+
+  // Warn about holiday limit
+  const limitReached = (label : string, extraDays : number) =>
+    Alert.alert(`Limite atteinte pour ${label}`, `Attention, vous avez atteint la limite imposée par vos supérieurs (${extraDays}).`, [
+        {text: "J'ai comrpis"},
+    ]
+  );
 
   //Changé la date de début
   const onChangeStartDate = (event: any, selectedDate: Date | undefined) => {
@@ -155,22 +197,71 @@ const DischargeRequest = () => {
     }
   }
 
+  // Verify if dates are superposed with others holidays
+  const verifyDates = () => {
+    for(const user of users){
+      if(user.email === userInfo?.user.email){
+        // Verify for personnal holidays
+        for(const conge of user.conges){
+          const isOverlapping = doDateRangesOverlap({start1Str : conge.startDate, end1Str : conge.endDate, start2Str : startDate, end2Str : endDate});
+          if(isOverlapping){
+            return true;
+          }
+        }
+
+        // Verify for national holidays
+        if(Array.isArray(belgiumHolidays)){
+          for(const element of belgiumHolidays){
+            const holidayDate = new Date(element.dateId);
+            const isOverlapping = doDateRangesOverlap({start1Str : holidayDate, end1Str : holidayDate, start2Str : startDate, end2Str : endDate});
+            if(isOverlapping){
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
   // Soumission
   const handleSubmit = () => {
     // testing types
-    if(type === "None"){
+    if(type.label === "None"){
       noType();
       return 0
     }
 
+    // Testing if selected dates are already taken
+    const isDateAlreadyTaken = verifyDates();
+
+    if(isDateAlreadyTaken){
+      selectedAnAlreadyTakenDate()
+      return 0
+    }
+
+    // Testing if type have need attachement
+    if(!(listTypeWithAttachement.includes(type.label)) && file === null){
+      attachementNeeded();
+      return 0
+    }
+
+    // Start date after end date
     if(startDate > endDate){
       wrongStartDate();
       return 0
     }
 
+    // Missing title or commentary
+    if(title === '' || comment === ''){
+      missingTitleOrComment();
+      return 0
+    }
+
     // Envoyer les données du formulaire à votre serveur ici
     if(userInfo !== null){
-      mutation.mutate({ title, startDate, endDate, comment, type, email: userInfo.user.email, file });
+      mutation.mutate({ title, startDate, endDate, comment, type : type.typeId, email: userInfo.user.email, file });
     }
 
     // Vider les champs après la soumission
@@ -178,7 +269,7 @@ const DischargeRequest = () => {
     setStartDate(new Date());
     setEndDate(new Date());
     setComment('');
-    setType("None");
+    setType({label : "None", typeId: "None"});
     setFile(null);
   };
   
@@ -187,18 +278,83 @@ const DischargeRequest = () => {
    const mutation = useMutation({
         mutationFn: newRequest,
         onSuccess: (data: string) => {
-          console.log(data)
             queryClient.invalidateQueries({ queryKey: ["holidays"] });
+            queryClient.invalidateQueries({ queryKey: ["currentHoliday"] });
         },
     });
+  
+  // Count how many holidays used in this year
+ const countDaysInCurrentYear = (startStr: Date, endStr: Date): number => {
+  const start = new Date(startStr);
+  const end = new Date(endStr);
 
-  if(isLoading){
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    throw new Error('Invalid date input.');
+  }
+    // Ensure correct order
+    const realStart = start < end ? start : end;
+    const realEnd = start < end ? end : start;
+  
+    const today = new Date();
+    const currentYear = today.getFullYear();
+  
+    // Boundaries of current year
+    const yearStart = new Date(currentYear, 0, 1);   // Jan 1
+    const yearEnd = new Date(currentYear, 11, 31);   // Dec 31
+  
+    // Determine overlap
+    const rangeStart = realStart > yearStart ? realStart : yearStart;
+    const rangeEnd = realEnd < yearEnd ? realEnd : yearEnd;
+  
+    if (rangeStart > rangeEnd) return 0;
+  
+    // Count days in overlap (inclusive)
+    let count = 0;
+    const current = new Date(rangeStart);
+  
+    while (current <= rangeEnd) {
+      count++;
+      current.setDate(current.getDate() + 1);
+    }
+  
+    return count;
+  };
+  
+  // Verify limite of holidays authorize
+  const verifyLimit = (value : {
+    label: string;
+    typeId: string;
+  }) => {
+    for(const user of users){
+      if(user.email === userInfo?.user.email){
+        for(const element of allowedHolidays){
+          if(element.typeId === value.typeId){
+            let totalNumberOfHolidays = 0;
+            for(const conge of user.conges){
+              const numberOfDays = countDaysInCurrentYear(conge.startDate, conge.endDate);
+              if(conge.typeId === value.typeId){
+                totalNumberOfHolidays += numberOfDays;
+              }
+            }
+            if(totalNumberOfHolidays >= element.remainingDays){
+              limitReached(value.label, totalNumberOfHolidays - element.remainingDays);
+            }
+            break;
+          }
+        }
+
+        break;
+      }
+    }
+  }
+
+  if(isLoading || isUsersLoading || currentLoading || allowedLoading){
     return <SafeAreaView className="flex flex-col justify-content items-center"><ActivityIndicator /></SafeAreaView>
   }else{
     return (
       <ScrollView>
         <SafeAreaView style={styles.container}>
-          <Text style={styles.title}>Mon Formulaire</Text>
+          <Text style={styles.title}>Formulaire</Text>
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Titre :</Text>
@@ -253,13 +409,16 @@ const DischargeRequest = () => {
             <Picker
                 selectedValue={type}
                 style={styles.picker}
-                onValueChange={(itemValue) => setType(itemValue)}
+                onValueChange={(itemValue) => {
+                  setType(itemValue);
+                  verifyLimit(itemValue);
+                }}
               >
                 <Picker.Item label="Selectionnez un type" value="None"/>
                 {!isLoading && Array.isArray(types) && !isError ? (
                         types.length && (
                             types.map((type: {label: string, typeId: string}) => (
-                                <Picker.Item key={type.typeId} label={type.label} value={type.typeId}/>
+                                <Picker.Item key={type.typeId} label={type.label} value={type}/>
                             ))
                         )
                     ) : (<Picker.Item label="Aucun types trouvées..." value="" />)}

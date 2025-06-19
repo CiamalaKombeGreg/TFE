@@ -9,8 +9,18 @@ export class PersonnelController {
   constructor(private personnelService: PersonnelService) {}
 
   @Get(':id')
-      getUserById(@Param('id') id: string){
+      getIdByEmail(@Param('id') id: string){
           return this.personnelService.getIdByEmail(id);
+    }
+}
+
+@Controller('personnelID')
+export class PersonnelIdController {
+    constructor(private personnelService: PersonnelService) {}
+
+    @Get(':id')
+    getUserById(@Param('id') id: string){
+        return this.personnelService.getUserById(id);
     }
 }
 

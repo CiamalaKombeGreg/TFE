@@ -91,6 +91,17 @@ export class AbsencesService {
         });
     }
 
+    getCurrentHoliday(email : string) {
+        return this.prisma.absences.findMany({
+            where : {
+                personnel : {
+                    email : email
+                },
+                status : "ACCEPTER"
+            },
+        })
+    }
+
     async getAbsenceOwnerById(id: string) {
         const user = await this.prisma.absences.findUnique({
             where : {

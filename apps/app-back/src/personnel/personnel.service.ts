@@ -52,6 +52,25 @@ export class PersonnelService {
         });
     }
 
+    // Get user by ID
+    getUserById(id : string){
+        return this.prisma.personnel.findUnique({
+            where : {
+                prsId : id
+            },
+            select : {
+                prsId: true,
+                pseudo : true,
+                email : true,
+                role: true,
+                supervisor: true,
+                supervise: true,
+                conges: true,
+                totalConge: true,
+            }
+        })
+    }
+
     // Update supervisor
     async updateSupervision({supervisorIdList, superviseId} : {supervisorIdList : string[], superviseId : string}){
         // Add every supervision
@@ -101,14 +120,30 @@ export class PersonnelService {
     }
 
     // Update roles from a certain user
-    updateUserRoles({email, roles} : {email : string, roles : Role[]}){
-        return this.prisma.personnel.update({
+    async updateUserRoles({email, roles} : {email : string, roles : Role[]}){
+        // Verify if there will still be one admin
+        const admins = await this.prisma.personnel.findMany({
             where : {
-                email: email
+                role : {
+                    has : "SUPERADMIN"
+                }
             },
-            data : {
-                role : roles
+            select : {
+                email : true
             }
-        })
+        });
+
+        if(admins.length <= 1 && email === admins[0].email && !roles.includes("SUPERADMIN")){
+            return {status : 403 , message : "Not permitted as at least one admin is needed."}
+        }else{
+            return this.prisma.personnel.update({
+                where : {
+                    email: email
+                },
+                data : {
+                    role : roles
+                }
+            })
+        }
     }
 }

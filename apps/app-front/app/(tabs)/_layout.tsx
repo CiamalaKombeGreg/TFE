@@ -9,7 +9,8 @@ import {
   Text,
   View,
   Image,
-  Pressable
+  Pressable,
+  TouchableOpacity
 } from "react-native";
 import {
   GoogleSignin,
@@ -18,6 +19,8 @@ import {
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import {AuthResponse} from "@/lib/types";
+import { useRouter } from "expo-router";
+import { getAdmin } from "@/lib/getAdmin";
 
 
 WebBrowser.maybeCompleteAuthSession();
@@ -39,6 +42,12 @@ const tabs = {
   idHoliday: "Requests/[id]",
   userList: "users/usersList",
   supervisor: "users/Supervisor",
+  checkRepas: "checkRepas/CheckRepas",
+  userHolidayParameter: "users/[id]",
+  help: "help/help",
+  helpType: "help/helpType",
+  helpForm: "help/helpFormulaire",
+  helpHoli: "help/helpHoliday",
 };
 
 const ValidateAuth = async (data: AuthResponse) => {
@@ -66,9 +75,13 @@ const ValidateAuth = async (data: AuthResponse) => {
 const DrawerLayout = () => {
   const [verifiedEmail, setVerifiedEmail] = React.useState<boolean>(false)
 
+  const [userInfo, setUserInfo] = React.useState<AuthResponse | undefined>(undefined);
+
   const queryClient = useQueryClient();
 
   const links = Object.values(tabs);
+
+  const router = useRouter();
 
   /* ---------------------------- AUTHENTICATION ---------------------------- */
 
@@ -94,6 +107,7 @@ const DrawerLayout = () => {
       const response = await GoogleSignin.signIn();
       if (isSuccessResponse(response)) {
         mutation.mutate(response.data)
+        setUserInfo(response.data)
       } else {
         // sign in was cancelled by user
       }
@@ -131,11 +145,95 @@ const DrawerLayout = () => {
     return (
       <View className="bg-blue-500 hover:bg-blue-700 py-2 px-4 m-2 rounded">
         <Pressable onPress={signOut}>
-          <Text className="text-white font-bold">Sign Out</Text>
+          <Text className="text-white text-sm font-bold">Se déconnecter</Text>
         </Pressable>
       </View>
     );
   };
+    
+    /* ------------------------- CUSTOM DRAWER ------------------------- */
+
+    const CustomDrawerContent = () => {
+      return (
+        <View className="flex-1 justify-between">
+          <View>
+            <Image
+                className="h-32 w-32 rounded-full object-cover self-center mt-8"
+                source={require('../../assets/images/Getaway logo.png')}
+                alt="Profile Picture"
+              />
+          </View>
+          <View>
+            <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)"})}>
+              <View className="bg-[#03a4c3] m-2 p-4 rounded-3xl">
+                <Text className="text-white text-xl"> Accueil </Text>
+              </View>
+            </TouchableOpacity>
+
+            <Text className="text-center text-white text-lg"> ────────  Utilisateurs  ────────</Text>
+
+            <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/users/usersList"})}>
+              <View className="bg-[#03a4c3] m-2 p-4 rounded-3xl">
+                <Text className="text-white text-xl"> Organisation </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/users/Supervisor"})}>
+              <View className="bg-[#03a4c3] m-2 p-4 rounded-3xl">
+                <Text className="text-white text-xl"> Superviseurs </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/checkRepas/CheckRepas"})}>
+              <View className="bg-[#03a4c3] m-2 p-4 rounded-3xl">
+                <Text className="text-white text-xl"> Chèques repas </Text>
+              </View>
+            </TouchableOpacity>
+
+            <Text className="text-center text-white text-lg"> ────────  Congés  ────────</Text>
+
+            <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/form/dischargeRequest"})}>
+              <View className="bg-[#03a4c3] m-2 p-4 rounded-3xl">
+                <Text className="text-white text-xl"> Formulaire </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/Requests/MyHolidays"})}>
+              <View className="bg-[#03a4c3] m-2 p-4 rounded-3xl">
+                <Text className="text-white text-xl"> Congés </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/calendar/Calendar"})}>
+              <View className="bg-[#03a4c3] m-2 p-4 rounded-3xl">
+                <Text className="text-white text-xl"> Calendrier </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        
+
+          {/* Profile Button */}
+            <View className="flex flex-row">
+              <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/users/user"})} className="ml-4">
+                <Image
+                  className="h-16 w-16 rounded-full border-2 border-cyan-300 object-cover"
+                  src={userInfo?.user.photo ?? ""}
+                  alt="Profile Picture"
+                />
+                <Text className="opacity-0">Profil</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push({pathname : "/(tabs)/help/help"})} className="ml-4">
+                <Image
+                  className="h-16 w-16 rounded-full border-2 border-cyan-300 object-cover"
+                  source={require('../../assets/images/question.png')}
+                  alt="Help picture"
+                />
+                <Text className="opacity-0">Help</Text>
+              </TouchableOpacity>
+            </View>
+        </View>
+      )
+    }
 
     /* ---------------------------- DISPLAY ---------------------------- */
 
@@ -151,8 +249,10 @@ const DrawerLayout = () => {
                 alt="Profile Picture"
               />
             </View>
-          <Text>Authenticate with google</Text>
-          <Button title="Sign in with Google" onPress={signIn} />
+            <Text className="text-center text-white text-lg m-4 p-2">Votre équipe vous attend pour communiquer vos demandes !</Text>
+          <TouchableOpacity className="flex justify-center items-center bg-cyan-700 m-2 p-2 w-[90%] rounded-xl" onPress={signIn}>
+            <Text className="text-white">Se connecter avec @rush.be</Text>
+          </TouchableOpacity>
         </SafeAreaView>
       </>
     )
@@ -160,7 +260,22 @@ const DrawerLayout = () => {
 
   return (
     <>
-      <Drawer>
+      <Drawer
+      drawerContent={() => CustomDrawerContent()}
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#00b8db',
+        },
+        headerTintColor: '#fff',
+        drawerStyle: {
+          backgroundColor: '#0097b4',
+        },
+        drawerLabelStyle: {
+          color: '#fff',
+          fontSize: 16,
+          fontWeight: 'bold',
+        },
+      }}>
         <Drawer.Screen
           name={tabs.Accueil}
           options={{
@@ -224,6 +339,60 @@ const DrawerLayout = () => {
             headerRight: () => <CustomHeader />,
             drawerLabel: "Supervision",
             title: "Supervision",
+          }}
+        />
+
+        <Drawer.Screen
+          name={tabs.checkRepas}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Chèques repas",
+            title: "Chèques repas",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.userHolidayParameter}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Paramètre de congé",
+            drawerItemStyle: {display: 'none'},
+            title: "Paramètre de congé",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.help}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Information",
+            drawerItemStyle: {display: 'none'},
+            title: "Information",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.helpType}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Quel type ?",
+            drawerItemStyle: {display: 'none'},
+            title: "Quel type ?",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.helpForm}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Utiliser le formulaire...",
+            drawerItemStyle: {display: 'none'},
+            title: "Utiliser le formulaire...",
+          }}
+        />
+        <Drawer.Screen
+          name={tabs.helpHoli}
+          options={{
+            headerRight: () => <CustomHeader />,
+            drawerLabel: "Gérer les congés",
+            drawerItemStyle: {display: 'none'},
+            title: "Gérer les congés",
           }}
         />
       </Drawer>

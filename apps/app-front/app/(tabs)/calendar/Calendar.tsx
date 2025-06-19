@@ -106,22 +106,70 @@ const CalendarHoliday = () => {
     const [selectedDate, setSelectedDate] = useState(todayId);
     const [monthIds, setMonthsIds] = useState<string[]>(generateMonthIds(today, 12));
     const [disabledWeekends, setDisabledWeekends] = useState<string[]>(getDisabledWeekendIds(new Date(), 12));
-    const {data : belgiumHoliday, isLoading} = useGetBelgiumHolidays('2025');
+    const {data : belgiumHoliday, isLoading : currentLoading} = useGetBelgiumHolidays(`${new Date().getFullYear()}`);
+    const {data : belgiumHolidayNextYear, isLoading : nextLoading} = useGetBelgiumHolidays(`${new Date().getFullYear() + 1}`);
+
+    // Current day
+    const [currentHoliday, setCurrentHoliday] = useState<{name : string, dd : string, df : string}>({name : "Pas de congé", dd: todayId, df : todayId});
+
+    // Calendar styled dates
+    const [belgiumHolidaysStyled, setBelgiumHolidayStyled] = useState(undefined);
+
+    // Transform normal holidays into styled ones
+    const holidayStyling = (holidays : {dateId : string, name : string}[]) => {
+      const holidayStyles : any = {};
+
+      holidays.forEach(holiday => {
+        holidayStyles[holiday.dateId] = {
+          containerStyle: {
+            backgroundColor: '#f87171',
+            borderRadius: 4,
+          },
+          textStyle: {
+            color: '#fff',
+            fontWeight: 'bold',
+          },
+        };
+      });
+
+      setBelgiumHolidayStyled(holidayStyles);
+
+    }
+
+    // Update current date
+    const changeDate = (value : string) => {
+      setSelectedDate(value)
+      if(Array.isArray(belgiumHoliday)){
+        for(const element of belgiumHoliday){
+          if(element.dateId === value){
+            setCurrentHoliday({name : element.name, dd: element.dateId, df: element.dateId});
+          }
+        }
+      }
+
+      if(Array.isArray(belgiumHolidayNextYear)){
+        for(const element of belgiumHolidayNextYear){
+          if(element.dateId === value){
+            setCurrentHoliday({name : element.name, dd: element.dateId, df: element.dateId});
+          }
+        }
+      }
+    }
 
     //Classname of info
     const textClass = classNames({
         'text-white' : true,
     })
 
-    if(isLoading){
+    if(currentLoading || nextLoading){
         return <SafeAreaView className="flex flex-col justify-content items-center"><ActivityIndicator /></SafeAreaView>
     }else{
         return (
             <View className='flex bg-cyan-500'>
                 <View className='self-center bg-cyan-700 w-[90%] rounded-lg p-4 m-4'>
-                    <Text className={textClass}>Nom : </Text>
-                    <Text className={textClass}>Date de début : </Text>
-                    <Text className={textClass}>Date de fin : </Text>
+                    <Text className={textClass}>Nom : {currentHoliday.name}</Text>
+                    <Text className={textClass}>Date de début : {currentHoliday.dd}</Text>
+                    <Text className={textClass}>Date de fin : {currentHoliday.df}</Text>
                 </View>
                 <ScrollView>
                     <View className='bg-cyan-500 p-12 gap-4'>
@@ -132,7 +180,7 @@ const CalendarHoliday = () => {
                             calendarDisabledDateIds={disabledWeekends}
                             theme={linearTheme}
                             calendarActiveDateRanges={[{ startId: selectedDate, endId: selectedDate }]}
-                            onCalendarDayPress={setSelectedDate}
+                            onCalendarDayPress={(value) => changeDate(value)}
                             />
                         </View>
                         ))}

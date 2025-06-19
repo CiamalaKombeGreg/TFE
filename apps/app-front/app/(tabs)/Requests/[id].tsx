@@ -43,14 +43,14 @@ const HolidayItem = () => {
     const deleteHoliday = useDeleteHoliday(id);
     const updateHoliday = useRespondRequest(id);
     const editHoliday = useEditRequest(id);
-    const router = useRouter()
+    const router = useRouter();
 
     // Modals hooks
-    const [openEdit, setOpenEdit] = useState<boolean>(false)
-    const [openDelete, setOpenDelete] = useState<boolean>(false)
-    const [openStatus, setOpenStatus] = useState<boolean>(false)
-    const [openCancel, setOpenCancel] = useState<boolean>(false)
-    const [openRefuse, setOpenRefuse] = useState<boolean>(false)
+    const [openEdit, setOpenEdit] = useState<boolean>(false);
+    const [openDelete, setOpenDelete] = useState<boolean>(false);
+    const [openStatus, setOpenStatus] = useState<boolean>(false);
+    const [openCancel, setOpenCancel] = useState<boolean>(false);
+    const [openRefuse, setOpenRefuse] = useState<boolean>(false);
 
     // Others hooks
     const [type, setType] = useState<string>("");
@@ -177,7 +177,10 @@ const HolidayItem = () => {
         setType(type);
         if(userInfo?.user.email !== undefined){
             const data = await getAdmin(userInfo?.user.email);
-            setIsAdmin(data.isAdmin);
+            if(data.isAdmin){
+                setIsSupervisor(true);
+                setIsAdmin(true);
+            }
         }
 
         if(id !== undefined && userInfo?.user.email !== undefined){
@@ -221,14 +224,14 @@ const HolidayItem = () => {
             </View>
             <View>
                 <Text className={('text-xs text-gray-800')}>From : {owner}</Text>
-                <Text className={('text-lg font-bold text-gray-800')}>{data?.title ?? "Chargement"}</Text>
-                <Text className={('text-gray-600')}>Type : {type ?? "Chargement"}</Text>
-                <Text className={('text-gray-600')}>Statut : {data?.status ?? "Chargement"}</Text>
-                <Text className={('text-gray-600')}>Commentaire : {data?.commentaire ?? "Chargement"}</Text>
-                <Text className={('text-gray-600')}>Date de début : {new Date(data?.startDate).toLocaleDateString() ?? "Chargement"}</Text>
-                <Text className={('text-gray-600')}>Date de fin : {new Date(data?.endDate).toLocaleDateString() ?? "Chargement"}</Text>
-                <Text className={('text-gray-600')}>Mise à jour le : {new Date(data?.updateAt).toLocaleDateString() ?? "Chargement"} vers {new Date(data?.updateAt).toLocaleTimeString()}</Text>
-                {data?.fileKey && <TouchableOpacity onPress={downloadFile} className="text-gray-600 hover:text-blue-600"><Text>Télécharger la pièce jointe</Text></TouchableOpacity>}
+                <Text className={('text-xl font-bold text-gray-800 m-2')}>{data?.title ?? "Chargement"}</Text>
+                <Text className={('text-gray-600 mt-2')}>Type : {type ?? "Chargement"}</Text>
+                <Text className={('text-gray-600 mt-2')}>Statut : {data?.status ?? "Chargement"}</Text>
+                <Text className={('text-gray-600 mt-2')}>Commentaire : {data?.commentaire ?? "Chargement"}</Text>
+                <Text className={('text-gray-600 mt-2')}>Date de début : {new Date(data?.startDate).toLocaleDateString() ?? "Chargement"}</Text>
+                <Text className={('text-gray-600 mt-2')}>Date de fin : {new Date(data?.endDate).toLocaleDateString() ?? "Chargement"}</Text>
+                <Text className={('text-gray-600 mt-2')}>Mise à jour le : {new Date(data?.updateAt).toLocaleDateString() ?? "Chargement"} vers {new Date(data?.updateAt).toLocaleTimeString()}</Text>
+                {data?.fileKey && !openDelete && !openEdit && !openStatus && <TouchableOpacity disabled={openDelete || openEdit || openStatus} onPress={downloadFile} className="self-center text-gray-600 hover:text-blue-600 m-4 w-[80%] bg-gray-200 p-4 rounded-lg"><Text className='text-center'>Télécharger la pièce jointe</Text></TouchableOpacity>}
             </View>
             <View className={('flex-row justify-around p-4')}>
 

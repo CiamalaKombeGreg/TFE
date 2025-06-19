@@ -1,0 +1,54 @@
+# ---------- BUILD ----------
+    FROM node:20-alpine AS builder
+
+    WORKDIR /usr/src/app
+    
+    # Copy package files
+    COPY package*.json ./
+    
+    # Install all dependencies, including aws-sdk and prisma client
+    RUN npm install @aws-sdk/client-s3
+
+    RUN npm install --legacy-peer-deps
+    
+    # Copy source files
+    COPY . .
+    
+    # Generate Prisma client
+    RUN npx prisma generate
+    
+    # Build the app
+    RUN npm run build
+    
+    
+    # ---------- PRODUCTION ----------
+    FROM node:20-alpine
+    
+    WORKDIR /usr/src/app
+    
+    ARG NODE_ENV=production
+    ENV NODE_ENV=${NODE_ENV}
+    
+    # Copy built files and prisma schema
+    COPY --from=builder /usr/src/app/dist ./dist
+    COPY --from=builder /usr/src/app/prisma ./prisma
+    
+    # Copy package files for production deps
+    COPY package*.json ./
+    
+    # Install production dependencies only
+    RUN npm install --only=production
+    
+    # Remove package.json files if needed (optional)
+    RUN rm package*.json
+    
+    # Copy entrypoint script
+    COPY entrypoint.sh ./
+    RUN chmod +x ./entrypoint.sh
+    
+    # Expose NestJS port
+    EXPOSE 3000
+    
+    # Run entrypoint which runs migration and then starts app
+    ENTRYPOINT ["./entrypoint.sh"]
+    

@@ -1,13 +1,21 @@
 import MHCard from "@/components/element/MyHolidays/MHCard";
-import { useGetHolidays } from "@/components/hooks/useGetHolidays";
 import { ActivityIndicator, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { AuthResponse, Holiday, UserRelatedAbsenceProps } from "@/lib/types";
+import { AuthResponse } from "@/lib/types";
 import React, { useState } from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import { Picker } from "@react-native-picker/picker";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useGetRelatedHolidays } from "@/components/hooks/useGetRelatedHolidays";
+
+// Sort on start date
+export const orderHoliday = (firstDate : Date, secondDate : Date) => {
+    if(firstDate >= secondDate){
+        return 1
+    }else{
+        return -1
+    }
+}
 
 const MyHolidays = () => {
     // Authentification user
@@ -29,16 +37,7 @@ const MyHolidays = () => {
     // Status hook
     const [status, setStatus] = useState<"ALL" | "ACCEPTER" | "REFUSER" | "ANALYSE" | "ANNULER">("ALL");
 
-    // Sort on start date
-    const orderHoliday = (firstDate : Date, secondDate : Date) => {
-        if(firstDate >= secondDate){
-            return 1
-        }else{
-            return -1
-        }
-    }
-
-    if(isUsersLoading){
+    if(isUsersLoading || users.length <= 0){
         return (
                     <SafeAreaView className="flex flex-col justify-content items-center"><ActivityIndicator /></SafeAreaView>
                 )
@@ -47,9 +46,8 @@ const MyHolidays = () => {
     }else{
         return(
             <SafeAreaView className="flex flex-col items-center justify-center bg-gray-100 h-full w-full">
-                {/* Title & selection */}
+                {/* selection */}
                 <View className="flex w-full p-2 bg-gray-200">
-                    <Text className="text-bold text-4xl m-2 text-center">Mes congés</Text>
                     {/* Tabs to select users & status */}
                     <View className="flex gap-4 z-10">
                         <View className="m-2">

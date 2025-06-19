@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import {Picker} from '@react-native-picker/picker';
 import {useGetRoles} from "%/hooks/useGetRoles";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { useRouter } from 'expo-router';
 
 import { useGetUsers } from "@/components/hooks/useGetUsers";
 import { UserModal } from "@/components/element/users/userParamModal";
@@ -18,6 +19,7 @@ const UsersList = () => {
     const { data : users, isLoading: isUsersLoading  } = useGetUsers();
     const [allModal, setAllModal] = useState<UsersListModal[]>([]);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const router = useRouter();
 
     // Authentification user
     const [userInfo, setUserInfo] = React.useState<AuthResponse | null>(null);
@@ -53,7 +55,8 @@ const UsersList = () => {
                     <Text className="text-xl m-2">{user?.pseudo}</Text>
                     <View className="flex flex-row gap-8">
                         {!user.isOpen && <Text className="font-bold">{user?.email}</Text>}
-                        {!user.isOpen && <TouchableOpacity className="bg-green-500 rounded-lg p-1" onPress={() => openModal(user)}><Text className="text-white font-bold">Paramètre</Text></TouchableOpacity>}
+                        {!user.isOpen && <TouchableOpacity className="bg-green-500 rounded-lg p-1" onPress={() => openModal(user)}><Text className="text-white font-bold">Rôles</Text></TouchableOpacity>}
+                        {isSuperAdmin && !user.isOpen && <TouchableOpacity className="bg-gray-500 rounded-lg p-1" onPress={() => router.push({pathname: '/users/[id]', params: { id: user.id }})}><Text className="text-white font-bold">Limites</Text></TouchableOpacity>}
                         {user.isOpen && <UserModal currentViewer={userInfo?.user.email} isAdminViewer={isSuperAdmin} refresh={refresh} closeModal={openModal} setisModalOpen={setIsModalOpen} user={user} rolesList={rolesArray} />}
                     </View>
                 </View>
@@ -115,11 +118,6 @@ const UsersList = () => {
         }
         return (
             <ScrollView className="z-10 relative">
-                {/* Title */}
-                <View className="z-10">
-                    <Text className="text-3xl p-4">Utilisateurs</Text>
-                </View>
-
                 {/* Tabs to select enums */}
                 <View className="z-10">
                     <Picker
