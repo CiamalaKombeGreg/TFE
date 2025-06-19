@@ -124,7 +124,7 @@ export const SupervisionUser = ({isSuperAdmin ,userId, users, supervisorList} : 
                 if(user.id === supervisor.id){
                     return (
                         <View key={user.id} className="flex flex-row justify-between items-center gap-4 p-4">
-                            <Text>{user.pseudo}</Text>
+                            <Text className="text-white">{user.pseudo}</Text>
                             <TouchableOpacity disabled={!isSuperAdmin} className={removeButton} onPress={() => removeSupervisor(supervisor.id)}>
                                 <Text className={removeText}>Retirer</Text>
                             </TouchableOpacity>
@@ -185,13 +185,13 @@ export const SupervisionUser = ({isSuperAdmin ,userId, users, supervisorList} : 
     return (
         <View>
             {/* Supervisor */}
-            <View>
-                <Text className="bg-green-300 p-4 rounded-xs">Liste des superviseurs</Text>
+            <View className="bg-green-500 p-4 rounded-xs border-2 border-green-800">
+                <Text className="text-white font-bold text-xl">Liste des superviseurs</Text>
                 {currentSupervisors.map((supervisor) => getCurrentSupervisor(supervisor))}
             </View>
             {/* Don't supervise */}
-            <View>
-                <Text className="bg-gray-300 p-4 rounded-xs">Ne supervise pas</Text>
+            <View className="bg-gray-300 p-4 rounded-xs border-2 border-gray-800">
+                <Text className="font-bold text-xl">Ne supervise pas</Text>
                 {currentSupervisors.map((supervisor) => getNonSupervisor(supervisor))}
             </View>
             <TouchableOpacity className="m-4 self-center w-[80%] bg-blue-300 rounded-lg p-3" onPress={() => updateSupervision()}>
